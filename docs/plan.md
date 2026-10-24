@@ -2,9 +2,9 @@
 
 The to-do list comes first. The settled design follows as reference. A step is done when its completion criterion holds. Tick the box and write the proof on the same line.
 
-## Status 2026-10-24
+## Status 2026-10-25
 
-Both arms delivered issue #1 with an approved review. PR 5 (Cloud) and PR 6 (platform) stay open and unmerged as evidence. Both arms hit the same egress block on `geocoding-api.open-meteo.com`, and the operator widened both allowlists. After that, the Cloud egress path stalled intermittently for about 15 minutes. Live job steps on GitHub returned the same day. Next: the probe sessions on issue #2 (one per controls row), the fire endpoint start probe (`github-start`), the `@claude` side experiment, the Grafana Cloud OTel export, then the report table and the Pages site.
+Both arms delivered issue #1 with an approved review. PR 5 (Cloud) and PR 6 (platform) stay open and unmerged as evidence. On 2026-10-24 the issue #2 probes ran for thirteen rows: cloud-logging, substrate, model-credential, forge-credential, vault-secret, egress, tool-model-policy, run-history, audit-record, subagent-record, toolchain, branch-protection and github-start, plus the `@claude` side experiment. Each has `probes/<row>/finding.md` and a tick below. Three controls fired on probe prompts and are recorded in `probes/audit-record/finding.md`. Open: crash-resume waits for the container reclaim of the "Crash resume probe" session; spend-attribution needs a Grafana Cloud stack the operator has not set up, and the alternative cell is "not demonstrated: no public collector"; setup-cost is a count over the captures; then the report table, the Pages site and the teardown. The teardown item below lists every throwaway made on 2026-10-24.
 
 ## To-do
 
