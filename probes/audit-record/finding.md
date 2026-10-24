@@ -10,6 +10,14 @@ The session's transcript is a `.jsonl` file under `/root/.claude/projects/`, own
 
 The agent's transcript lives on the runner host, in a home directory that the factory mounts read-write into the container and that the container's own uid owns, and the agent runs with `--dangerously-skip-permissions`, so a shell command in the container can edit or delete it ([`capture-platform.md`](capture-platform.md)). The transcript is never uploaded in this arm, and the next job's `git clean -ffdx` removes it from the runner. The factory's starter at `v1.2.1` has a step that pushes transcripts to a private store, but the sample repo's workflow lacks it. The records outside the container's reach are the GitHub job log, the job summary, the pull request branch history and the gateway ledger, all written by processes on the host or on `llm-01`. The agent can add to the job log and the ledger through its output and its model calls, but it has no mount, credential or route to change or remove them.
 
+## The controls observed on 2026-10-24
+
+- The Cloud auto-mode classifier acts per command. It denied the append and the delete as "Session Transcript Tampering" ([`capture.md`](capture.md)).
+- The Cloud model-side safeguard acts per session. It moved two sessions to Sonnet 5 with the category "cyber" ([`../forge-credential/capture-refusal.md`](../forge-credential/capture-refusal.md) and [`capture.md`](capture.md)).
+- A classifier on the orchestrating Claude Code session on the workstation acts per response. It stopped an agent brief that described the same operation for the platform arm, and the brief was rewritten as a documentary inventory ([`capture-platform.md`](capture-platform.md)).
+
+The platform arm has no equivalent of any of the three.
+
 ## Comparison
 
 | Row | Cloud Sessions | Platform |
