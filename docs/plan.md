@@ -41,7 +41,7 @@ One probe session per row, on issue #2's branch or on no branch. A probe never t
 
 - [x] **substrate**: `uname -a`, `/proc/cpuinfo` hypervisor flags, `id`, `capsh --print`, `systemd-detect-virt`. Finding: who runs the code, as what user, with which capabilities. Proof: [`probes/substrate/finding.md`](../probes/substrate/finding.md).
 - [x] **model-credential**: search environment, filesystem and process list for an Anthropic key or a token. Finding: what the VM holds, by shape only. No value is captured. Proof: [`probes/model-credential/finding.md`](../probes/model-credential/finding.md).
-- [ ] **forge-credential**: the same search for a GitHub credential, then `gh auth status` and the token's scopes. Finding: what the VM holds and its scope.
+- [x] **forge-credential**: the same search for a GitHub credential, then `gh auth status` and the token's scopes. Finding: what the VM holds and its scope. Proof: [`probes/forge-credential/finding.md`](../probes/forge-credential/finding.md).
 - [ ] **vault-secret**: a network secret for a throwaway lab hostname. From inside the VM, `env` shows no value, and the endpoint's log shows the header present. Finding: where the key is attached.
 - [ ] **egress**: Custom level with one allowed domain. `curl` to the allowed domain, to `open-meteo.com`, to a raw IP and to a port other than 443. Finding: what the proxy returns for each.
 - [ ] **tool-model-policy**: `/model` with a model outside the pin, and a tool call to an MCP server the environment does not configure. Finding: the control that stopped each, or none.
