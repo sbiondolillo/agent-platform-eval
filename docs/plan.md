@@ -7,9 +7,9 @@ The to-do list comes first. The settled design follows as reference. A step is d
 ### Setup
 
 - [x] The eval repo `agent-platform-eval` is public on GitHub, and this file is on `main`. Proof: https://github.com/sbiondolillo/agent-platform-eval, `PUBLIC main` from `gh repo view`, 2026-10-24.
-- [ ] The target repo is public on GitHub, made from the starter at `dotnet-software-factory` tag `v1`, with `main` protected. Its name is written under **Names** below.
-- [ ] Issue #1 of the target repo carries the `forecast-sample` issue #1 text. Issue #2 is the probe issue: one sentence, one acceptance criterion, buildable in one turn.
-- [ ] The target repo's committed `.claude/settings.json` pins the model to Sonnet 5.5. Both arms read it.
+- [x] The target repo is public on GitHub, made from the starter at `dotnet-software-factory` tag `v1.1.0`, with `main` protected. Proof: https://github.com/sbiondolillo/platform-eval-sample, protection contexts `build` and `integration` read back, 2026-10-24.
+- [x] Issue #1 of the target repo carries the `forecast-sample` issue #1 text. Issue #2 is the probe issue, the factory's demo issue `--shout`. Proof: issues 1 and 2 on the target repo, 2026-10-24.
+- [x] The target repo's committed `.claude/settings.json` pins `claude-sonnet-5-5`. Proof: the first commit of the target repo.
 - [ ] A cloud environment exists for the target repo. Its setup script installs the .NET SDK that `global.json` pins, and a session runs `dotnet --version` with the pinned value.
 
 ### Platform arm
