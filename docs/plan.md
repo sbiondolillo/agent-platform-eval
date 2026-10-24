@@ -14,12 +14,12 @@ The to-do list comes first. The settled design follows as reference. A step is d
 
 ### Platform arm
 
-- [ ] A lab VM sits on the Sandbox VLAN. `tofu plan` showed one new VM and nothing else moved. The `homelab-compute` commit is cited here.
-- [ ] The VM runs a GitHub self-hosted runner registered to the target repo. The repo's Actions settings list it online.
-- [ ] The runner job pulls `FACTORY_GITHUB_TOKEN` and the gateway key from Infisical. The job log shows the pull. No GitHub Actions secret holds either value.
-- [ ] The container reaches the model through the lab gateway. `ANTHROPIC_BASE_URL` is set, and the gateway's spend row for the run names the consumer. A presence-only check proves the personal key is absent from the runner.
-- [ ] Egress from the VM is the Sandbox VLAN's deny-by-default rules. A `curl` to a domain off the allowlist fails from inside the container. A `curl` to `api.nuget.org` passes. Both outputs are captured.
-- [ ] The smoke run on issue #2 delivers a pull request. The Actions log of the public target repo is the proof.
+- [x] A lab VM sits on the Sandbox VLAN. Proof: `sandbox-01`, 10.25.0.10, VLAN 25. The plan showed one VM added and the stopped template's known computed-attribute noise. `homelab-compute` commit `429c6a7`, 2026-10-24.
+- [x] The VM runs a GitHub self-hosted runner registered to the target repo. Proof: the runners API lists `sandbox-01 online self-hosted,Linux,X64,dsf`. `homelab-ansible` commits `f54cbb2` and `3ee4df0`.
+- [x] The runner job pulls `FACTORY_GITHUB_TOKEN` and the gateway key from Infisical. Proof: the job's `infisical run` line in the Actions log of run 40115249577, and the target repo holds no Actions secret. The machine identity file is `/etc/homelab/dsf/.infisical-auth.env`, 0640 root:github-runner.
+- [x] The container reaches the model through the lab gateway. Proof: `telemetry.gateway_spend` has 12 calls for consumer `dsf`, model `anthropic/claude-sonnet-5-5`, $0.1915, between 17:15:20 and 17:17:06 UTC on 2026-10-24, equal to the job summary's three phase figures summed. The container received `ANTHROPIC_BASE_URL` only after `dotnet-software-factory` pull request 345, because the factory's `docker run` passed only the key. The runner holds a gateway consumer key, not a personal key.
+- [x] Egress from the VM is the Sandbox VLAN's deny-by-default rules plus Squid's allowlist. Proof: from the host, a direct probe to 1.1.1.1 is blocked and `api.nuget.org` through Squid answers 200. During the delivered run, Squid logged 23 `TCP_DENIED` for `api.anthropic.com:443` from the container's side calls, with no effect on the run. Captures in `probes/platform-smoke/`.
+- [x] The smoke run on issue #2 delivers a pull request. Proof: run 40115249577 on the target repo, every phase passed, pull request 3 opened by the factory at `ref=sandbox-anthropic-base-url`. Three earlier runs failed on the host's SDK ownership, the `aka.ms` redirect and a CIDR in `NO_PROXY`, each fixed in `homelab-ansible` `3ee4df0`.
 - [ ] GitHub shows the job's steps and their output live while the job runs on `sandbox-01`. Proof: a screenshot of a running job with the "Run the factory" step open and phase lines visible, saved under `probes/platform-live-steps/`. Retest on a later day. Found 2026-10-24: no run created that day rendered steps, on any runner. A three-step echo job on `sandbox-01`, the same job on the proxy-free `llm-01` runner, and the GitHub-hosted `ci` jobs all showed a blank job panel and zero steps from the jobs API, while a run from 2026-10-03 still returned four steps. The runner's own log reported every upload as a success, and Squid denied no GitHub host. GitHub's status page listed no incident.
 
 ### Cloud Sessions probes
