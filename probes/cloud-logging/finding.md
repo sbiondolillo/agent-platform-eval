@@ -10,11 +10,15 @@ Capture: [`capture.md`](capture.md).
 
 ## Step 2: Share link in a private window
 
-Pending.
+Answer: no for a reader without an account. The Share dialog has two scopes, "Private: Only you have access" and "Public: Anyone with the link can view". With Public set, the link opened in a private window redirected to the Claude sign-in page. The anonymous reader saw no transcript text. "Anyone with the link" thus means any signed-in Claude account. A signed-in account can retrieve the error text through the link, and nobody without an account can. The signed-in case was not tested with a second account.
+
+Capture: [`capture.md`](capture.md#step-2-share-link-in-a-private-window).
 
 ## Step 3: `claude --teleport` on the workstation
 
-Pending.
+Answer: yes in the terminal, no on disk. The teleport checked out the session's branch and rendered the whole conversation, with the exact 403 error text of the failed tool row and the full stdout of the shell row. No transcript file appeared under `~/.claude/projects/`, during the session or after `/exit`. The CLI reads the record from the server each time and holds the error text only in the terminal view. The reader is the account owner, with the CLI signed in.
+
+Capture: [`capture.md`](capture.md#step-3-claude---teleport-on-the-workstation).
 
 ## Step 4: repeat step 1 after the container is reclaimed
 
@@ -32,3 +36,16 @@ Answer: yes for the job log, no for the gateway ledger. The GitHub job log of ru
 | gateway ledger, `telemetry.gateway_calls` | no, spend only | the lab operator, over the `mcp_ro` role from the Management VLAN | as long as the table. A TTL moves rows to cold storage after 90 days. It deletes none. |
 
 Capture: [`capture-platform.md`](capture-platform.md).
+
+## Summary
+
+| step | Record | Error text kept | Who can read it | Retention |
+|---|---|---|---|---|
+| 1 | Cloud transcript, web UI | yes: the tool error text and the full shell stdout | the account owner, signed in | not recorded by this probe. The transcript outlived the container. |
+| 2 | Cloud transcript, Share link | yes, for a signed-in reader. Not tested with a second account. | any signed-in Claude account, with the Public scope set. Nobody without an account. | as for step 1, while the scope stays Public |
+| 3 | Cloud transcript, `claude --teleport` | yes, in the terminal view only. No file on disk. | the account owner, with the CLI signed in | as for step 1. Nothing is kept on the workstation. |
+| 4 | Cloud transcript, after the container is reclaimed | yes, the same text as step 1 | the account owner, signed in | not recorded by this probe. The record does not depend on the container. |
+| 5 | GitHub job log, run 40117342098 | yes, with stack trace | any signed-in GitHub account with read access to the public repo | 90 days, to on or about 2027-01-22 |
+| 5 | Gateway ledger, `telemetry.gateway_calls` | no, spend only | the lab operator, over `mcp_ro` from the Management VLAN | as long as the table. No row is deleted. |
+
+Cloud Sessions keep the error text in the server-side transcript, readable by signed-in accounts through the web UI, the Share link and the CLI; nothing is exported to disk.

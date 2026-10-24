@@ -30,7 +30,7 @@ Both arms delivered issue #1 with an approved review. PR 5 (Cloud) and PR 6 (pla
 
 One probe session per row, on issue #2's branch or on no branch. A probe never touches issue #1's branch. Each probe writes `probes/<row>/prompt.md`, `probes/<row>/capture.*` and `probes/<row>/finding.md`, where the finding names the docs URL and states the cell in one sentence. "Not documented" is a finding.
 
-- [ ] **cloud-logging**: first probe to run. Whether a Cloud session keeps the error text of a failed command, and who can read it. Captures go to `probes/cloud-logging/`.
+- [x] **cloud-logging**: first probe to run. Whether a Cloud session keeps the error text of a failed command, and who can read it. Captures go to `probes/cloud-logging/`. Proof: [`probes/cloud-logging/finding.md`](../probes/cloud-logging/finding.md).
    1. Open the Cloud delivery session "Platform eval sample issue #1" and expand the failed command rows. Record whether the full stdout and stderr of `git push` (403) and of the integration run (`NoAnswer`) are shown. Copy the exact text into `probes/cloud-logging/capture.md`.
    2. Open the session's Share link in a private window. Record what a reader without the account sees.
    3. Run `claude --teleport` for that session on the workstation. Record whether a transcript file appears under `~/.claude/projects/` and whether it holds the command output.
@@ -70,7 +70,7 @@ One probe session per row, on issue #2's branch or on no branch. A probe never t
 - [ ] The table in `site/` has sixteen rows and two columns. Every cell links its proof.
 - [ ] The report ends with the conditional: rows Cloud Sessions cover today, rows the factory owner must build under either choice, rows not documented and their probe result. Then one ladder rung per arm.
 - [ ] GitHub Pages serves `site/` from `main`, and the URL is in `README.md`.
-- [ ] The platform collector and the throwaway hostname are torn down. The teardown commit is cited here.
+- [ ] The platform collector and the throwaway hostname are torn down. The Share scope of the Cloud delivery session is set back to Private. The teardown commit is cited here.
 
 ## Settled design
 
