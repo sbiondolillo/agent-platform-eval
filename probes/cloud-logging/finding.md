@@ -24,4 +24,11 @@ Capture: [`capture.md`](capture.md). The same file holds both captures.
 
 ## Step 5: platform side
 
-Pending. The record to check is the GitHub job log for run 40117342098, and the gateway ledger.
+Answer: yes for the job log, no for the gateway ledger. The GitHub job log of run 40117342098 holds the 403 line and the full stack trace for all 4 failed tests. The ledger holds the run's 26 model calls and their cost, $0.52894, all with status `success`. It does not hold the failure, because the 403 is an egress denial and the test gate calls no model.
+
+| record | holds the 403 | who can read it | retained |
+|---|---|---|---|
+| GitHub job log, job `factory`, step "Run the factory" | yes, with stack trace | any signed-in GitHub account with read access to the public repo. A signed-out reader gets "Sign in to view logs". | 90 days, the repo setting and GitHub's default. Expires on or about 2027-01-22. |
+| gateway ledger, `telemetry.gateway_calls` | no, spend only | the lab operator, over the `mcp_ro` role from the Management VLAN | as long as the table. A TTL moves rows to cold storage after 90 days. It deletes none. |
+
+Capture: [`capture-platform.md`](capture-platform.md).
