@@ -30,6 +30,15 @@ Both arms delivered issue #1 with an approved review. PR 5 (Cloud) and PR 6 (pla
 
 One probe session per row, on issue #2's branch or on no branch. A probe never touches issue #1's branch. Each probe writes `probes/<row>/prompt.md`, `probes/<row>/capture.*` and `probes/<row>/finding.md`, where the finding names the docs URL and states the cell in one sentence. "Not documented" is a finding.
 
+- [ ] **cloud-logging**: first probe to run. Whether a Cloud session keeps the error text of a failed command, and who can read it. Captures go to `probes/cloud-logging/`.
+   1. Open the Cloud delivery session "Platform eval sample issue #1" and expand the failed command rows. Record whether the full stdout and stderr of `git push` (403) and of the integration run (`NoAnswer`) are shown. Copy the exact text into `probes/cloud-logging/capture.md`.
+   2. Open the session's Share link in a private window. Record what a reader without the account sees.
+   3. Run `claude --teleport` for that session on the workstation. Record whether a transcript file appears under `~/.claude/projects/` and whether it holds the command output.
+   4. After the container is reclaimed (the UI says so, or a day later), repeat step 1 and record any difference.
+   5. On the platform side, record that the same failure is in the GitHub job log for run 40117342098 (the 403 line with a stack trace, 90 days retention) and in the gateway ledger.
+
+   Completion criterion: `probes/cloud-logging/finding.md` states, for each of the four Cloud checks (steps 1 to 4), whether the error text is retrievable and by whom, with a capture file for each yes.
+
 - [ ] **substrate**: `uname -a`, `/proc/cpuinfo` hypervisor flags, `id`, `capsh --print`, `systemd-detect-virt`. Finding: who runs the code, as what user, with which capabilities.
 - [ ] **model-credential**: search environment, filesystem and process list for an Anthropic key or a token. Finding: what the VM holds, by shape only. No value is captured.
 - [ ] **forge-credential**: the same search for a GitHub credential, then `gh auth status` and the token's scopes. Finding: what the VM holds and its scope.
