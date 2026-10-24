@@ -57,7 +57,7 @@ Whether the raw stderr of `git push` sits in an expandable row was not checked.
 
 ## Step 2: Share link in a private window
 
-Taken 2026-10-24 between about 18:25 and 18:40 UTC.
+Taken 2026-10-24 between about 22:25 and 22:40 UTC.
 
 The Share dialog offers two scopes:
 
@@ -82,7 +82,7 @@ Not tested: a second, signed-in Claude account that opens the link.
 
 ## Step 3: `claude --teleport` on the workstation
 
-Taken 2026-10-24 between about 18:25 and 18:40 UTC.
+Taken 2026-10-24 between about 22:25 and 22:40 UTC.
 
 Run from a fresh clone at `/home/oniyama/dev/git/platform-eval-sample`:
 
