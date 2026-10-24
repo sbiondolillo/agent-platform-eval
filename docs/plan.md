@@ -63,14 +63,14 @@ One probe session per row, on issue #2's branch or on no branch. A probe never t
 
 ### Side experiment: the product behind `@claude`
 
-- [ ] The Claude GitHub App is installed on the target repo. An `@claude` mention on issue #2 is answered. Finding: where the run executed, an Actions log on a GitHub runner or a session at claude.ai/code.
+- [x] The Claude GitHub App is installed on the target repo. An `@claude` mention on issue #2 is answered. Finding: where the run executed, an Actions log on a GitHub runner or a session at claude.ai/code. Proof: [`probes/claude-mention/finding.md`](../probes/claude-mention/finding.md).
 
 ### Report
 
 - [ ] The table in `site/` has sixteen rows and two columns. Every cell links its proof.
 - [ ] The report ends with the conditional: rows Cloud Sessions cover today, rows the factory owner must build under either choice, rows not documented and their probe result. Then one ladder rung per arm.
 - [ ] GitHub Pages serves `site/` from `main`, and the URL is in `README.md`.
-- [ ] The platform collector and the throwaway hostname are torn down. The Share scope of the Cloud delivery session is set back to Private. The probe workflow `.github/workflows/probe-vault-secret.yml` is deleted from the sample repo. `PROBE_SECRET` is deleted from Infisical. The webhook.site network secret and allowed domain are removed from the Cloud environment. `webhook.site` is removed from the Squid allowlist. The empty probe commit c1c0122 on main of the sample repo stays as evidence. The teardown commit is cited here.
+- [ ] The platform collector and the throwaway hostname are torn down. The Share scope of the Cloud delivery session is set back to Private. The probe workflow `.github/workflows/probe-vault-secret.yml` is deleted from the sample repo. `PROBE_SECRET` is deleted from Infisical. The webhook.site network secret and allowed domain are removed from the Cloud environment. `webhook.site` is removed from the Squid allowlist. The Claude workflow `.github/workflows/claude.yml` and the secret `CLAUDE_CODE_OAUTH_TOKEN` are removed from the sample repo. The empty probe commit c1c0122 on main of the sample repo stays as evidence. The teardown commit is cited here.
 
 ## Settled design
 
