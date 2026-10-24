@@ -51,7 +51,7 @@ One probe session per row, on issue #2's branch or on no branch. A probe never t
 - [ ] **github-start**: a workflow on the `factory` label calls the scheduled-task fire endpoint. Finding: a session starts from the label, or the error the endpoint returns.
 - [ ] **crash-resume**: kill a session mid-run from the UI, then resume. Finding: what survived: history, files, background shells, subagents. Interruption captured in [`probes/crash-resume/capture.md`](../probes/crash-resume/capture.md); the reclaim step is pending.
 - [x] **subagent-record**: spawn one subagent, then look for its transcript in the UI, under `~/.claude/projects/` in the VM, and after a teleport. Finding: where the subagent's record is, and whether it survives the VM. Proof: [`probes/subagent-record/finding.md`](../probes/subagent-record/finding.md).
-- [ ] **toolchain**: the setup script's run time, its cache hit on the next session, and its expiry. Finding: the cost of a non-default toolchain.
+- [x] **toolchain**: the setup script's run time, its cache hit on the next session, and its expiry. Finding: the cost of a non-default toolchain. Proof: [`probes/toolchain/finding.md`](../probes/toolchain/finding.md).
 - [ ] **branch-protection**: push to the protected `main` from a session. Finding: the result, and whether required checks apply.
 - [ ] **setup-cost**: the steps and secrets from zero to the first delivered pull request, counted from the captures.
 
