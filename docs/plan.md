@@ -20,6 +20,7 @@ The to-do list comes first. The settled design follows as reference. A step is d
 - [ ] The container reaches the model through the lab gateway. `ANTHROPIC_BASE_URL` is set, and the gateway's spend row for the run names the consumer. A presence-only check proves the personal key is absent from the runner.
 - [ ] Egress from the VM is the Sandbox VLAN's deny-by-default rules. A `curl` to a domain off the allowlist fails from inside the container. A `curl` to `api.nuget.org` passes. Both outputs are captured.
 - [ ] The smoke run on issue #2 delivers a pull request. The Actions log of the public target repo is the proof.
+- [ ] GitHub shows the job's steps and their output live while the job runs on `sandbox-01`, the way the `llm-01` runner showed them without a proxy. Proof: a screenshot of the running job with the "Run the factory" step open and phase lines visible, saved under `probes/platform-live-steps/`. Found 2026-10-24: through Squid, the running job renders no steps, and the finished job lists one step, while the runner's own log reports every upload as a success.
 
 ### Cloud Sessions probes
 
