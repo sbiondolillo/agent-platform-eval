@@ -1,0 +1,91 @@
+# Plan
+
+The to-do list comes first. The settled design follows as reference. A step is done when its completion criterion holds. Tick the box and write the proof on the same line.
+
+## To-do
+
+### Setup
+
+- [x] The eval repo `agent-platform-eval` is public on GitHub, and this file is on `main`. Proof: https://github.com/sbiondolillo/agent-platform-eval, `PUBLIC main` from `gh repo view`, 2026-10-24.
+- [ ] The target repo is public on GitHub, made from the starter at `dotnet-software-factory` tag `v1`, with `main` protected. Its name is written under **Names** below.
+- [ ] Issue #1 of the target repo carries the `forecast-sample` issue #1 text. Issue #2 is the probe issue: one sentence, one acceptance criterion, buildable in one turn.
+- [ ] The target repo's committed `.claude/settings.json` pins the model to Sonnet 5.5. Both arms read it.
+- [ ] A cloud environment exists for the target repo. Its setup script installs the .NET SDK that `global.json` pins, and a session runs `dotnet --version` with the pinned value.
+
+### Platform arm
+
+- [ ] A lab VM sits on the Sandbox VLAN. `tofu plan` showed one new VM and nothing else moved. The `homelab-compute` commit is cited here.
+- [ ] The VM runs a GitHub self-hosted runner registered to the target repo. The repo's Actions settings list it online.
+- [ ] The runner job pulls `FACTORY_GITHUB_TOKEN` and the gateway key from Infisical. The job log shows the pull. No GitHub Actions secret holds either value.
+- [ ] The container reaches the model through the lab gateway. `ANTHROPIC_BASE_URL` is set, and the gateway's spend row for the run names the consumer. A presence-only check proves the personal key is absent from the runner.
+- [ ] Egress from the VM is the Sandbox VLAN's deny-by-default rules. A `curl` to a domain off the allowlist fails from inside the container. A `curl` to `api.nuget.org` passes. Both outputs are captured.
+- [ ] The smoke run on issue #2 delivers a pull request. The Actions log of the public target repo is the proof.
+
+### Cloud Sessions probes
+
+One probe session per row, on issue #2's branch or on no branch. A probe never touches issue #1's branch. Each probe writes `probes/<row>/prompt.md`, `probes/<row>/capture.*` and `probes/<row>/finding.md`, where the finding names the docs URL and states the cell in one sentence. "Not documented" is a finding.
+
+- [ ] **substrate**: `uname -a`, `/proc/cpuinfo` hypervisor flags, `id`, `capsh --print`, `systemd-detect-virt`. Finding: who runs the code, as what user, with which capabilities.
+- [ ] **model-credential**: search environment, filesystem and process list for an Anthropic key or a token. Finding: what the VM holds, by shape only. No value is captured.
+- [ ] **forge-credential**: the same search for a GitHub credential, then `gh auth status` and the token's scopes. Finding: what the VM holds and its scope.
+- [ ] **vault-secret**: a network secret for a throwaway lab hostname. From inside the VM, `env` shows no value, and the endpoint's log shows the header present. Finding: where the key is attached.
+- [ ] **egress**: Custom level with one allowed domain. `curl` to the allowed domain, to `open-meteo.com`, to a raw IP and to a port other than 443. Finding: what the proxy returns for each.
+- [ ] **tool-model-policy**: `/model` with a model outside the pin, and a tool call to an MCP server the environment does not configure. Finding: the control that stopped each, or none.
+- [ ] **run-history**: list sessions and download a transcript from outside the product, by API or CLI. Finding: the export path, or "not documented".
+- [ ] **spend-attribution**: OpenTelemetry to Grafana Cloud with the auth header in `OTEL_EXPORTER_OTLP_HEADERS`. If blocked, to the lab collector. Finding: the cost metric for one session, read by `ccr.session.id`.
+- [ ] **audit-record**: where the transcript lives, and whether a session command can edit or delete it. Finding: the record a compromised agent cannot erase, or none.
+- [ ] **github-start**: a workflow on the `factory` label calls the scheduled-task fire endpoint. Finding: a session starts from the label, or the error the endpoint returns.
+- [ ] **crash-resume**: kill a session mid-run from the UI, then resume. Finding: what survived: history, files, background shells, subagents.
+- [ ] **subagent-record**: spawn one subagent, then look for its transcript in the UI, under `~/.claude/projects/` in the VM, and after a teleport. Finding: where the subagent's record is, and whether it survives the VM.
+- [ ] **toolchain**: the setup script's run time, its cache hit on the next session, and its expiry. Finding: the cost of a non-default toolchain.
+- [ ] **branch-protection**: push to the protected `main` from a session. Finding: the result, and whether required checks apply.
+- [ ] **setup-cost**: the steps and secrets from zero to the first delivered pull request, counted from the captures.
+
+### Delivery run
+
+- [ ] The platform arm delivers a pull request on issue #1. Gates, review verdict, wall time and spend are recorded in `probes/delivery/platform.md`.
+- [ ] The cloud arm delivers a pull request on issue #1, started by the `github-start` path if it worked, else by `claude --cloud`. The same four values are in `probes/delivery/cloud.md`, with the start path named.
+- [ ] Both pull requests are open or merged on the target repo, side by side.
+
+### Side experiment: the product behind `@claude`
+
+- [ ] The Claude GitHub App is installed on the target repo. An `@claude` mention on issue #2 is answered. Finding: where the run executed, an Actions log on a GitHub runner or a session at claude.ai/code.
+
+### Report
+
+- [ ] The table in `site/` has sixteen rows and two columns. Every cell links its proof.
+- [ ] The report ends with the conditional: rows Cloud Sessions cover today, rows the factory owner must build under either choice, rows not documented and their probe result. Then one ladder rung per arm.
+- [ ] GitHub Pages serves `site/` from `main`, and the URL is in `README.md`.
+- [ ] The platform collector and the throwaway hostname are torn down. The teardown commit is cited here.
+
+## Settled design
+
+Decided in a grilling session on 2026-10-24. Each line is a decision, with its reason.
+
+- **Purpose.** Settle the direction of `dotnet-software-factory` v2: keep its own sandbox on a runner, or start its runs as Cloud Sessions from GitHub. The controls decide, because both arms run the same agent on the same model. A blog post is downstream.
+- **Shape.** A controls comparison, with one end-to-end delivery per arm as the path proof. A delivery-rate benchmark measures harness noise, because both arms run Claude Code on one model.
+- **Platform arm.** The .NET port on a self-hosted runner in a lab VM on the Sandbox VLAN, routed through the lab gateway, secrets pulled from Infisical, egress by the VLAN's allowlist. The .NET port on a GitHub-hosted runner is not a stand-in: it passes the key into the container and has open egress, so it loses the four rows the argument is about.
+- **Public assets on both sides.** A platform cell with only a private proof is marked unproven. The runner's runs show in the public target repo's Actions log, and the runner's config is published here.
+- **One target repo, one issue, two pull requests.** Holds the target constant, and puts the two results in one place a reader opens.
+- **Cloud start.** The fire endpoint on a label is the probe, `claude --cloud` the fallback. The Claude Code GitHub Action is named in the report as the trap: it is the platform's shape with the key in the job.
+- **Collector.** Grafana Cloud first, because its auth header tests the documented "credentials cannot go in environment variables" rule. A throwaway lab collector second.
+- **Conclusion.** A row-by-row conditional closed with a ladder rung per arm. A verdict hides the rows that are the same under either choice. A conditional is checked cell by cell.
+- **Scoring the delivery.** Gates, review verdict, wall time, spend. No blind judge: the run proves the path and does not rank the arms.
+- **Cut row.** "Gates read the tree, not the agent's report" is a property of the factory code, and both arms can hold it equally.
+
+## Names
+
+| name | value |
+|---|---|
+| target repo | `sbiondolillo/platform-eval-sample`, from the starter at `v1.1.0` |
+| cloud environment | to be filled when created |
+| throwaway hostname | to be filled when created |
+| model, both arms | `claude-sonnet-5-5`, hard-coded in the factory and pinned in the target's `.claude/settings.json` |
+| credit expiry | 2026-11-05 |
+
+## Sources
+
+- The eight building blocks of a factory, as the `homelab-factory` README and the post lay them out: gateway, tool and model policy, run history, sandbox, egress proxy, branch protection, network-free gates, and the issue-writing skill. They give rows 1 to 8.
+- The post [Beginning with the End in Mind](https://sambiondolillo.com/posts/beginning-with-the-end-in-mind), for the three qualities and the experiment form.
+- `homelab-factory` ADR-0002 and ADR-0007, for credential custody and the container decision.
+- Claude Code docs: https://code.claude.com/docs/en/claude-code-on-the-web, https://code.claude.com/docs/en/cloud-environments, https://code.claude.com/docs/en/security, https://code.claude.com/docs/en/monitoring-usage, https://code.claude.com/docs/en/routines.
