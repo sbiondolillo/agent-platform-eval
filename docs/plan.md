@@ -47,7 +47,7 @@ One probe session per row, on issue #2's branch or on no branch. A probe never t
 - [x] **tool-model-policy**: `/model` with a model outside the pin, and a tool call to an MCP server the environment does not configure. Finding: the control that stopped each, or none. Proof: [`probes/tool-model-policy/finding.md`](../probes/tool-model-policy/finding.md).
 - [x] **run-history**: list sessions and download a transcript from outside the product, by API or CLI. Finding: the export path, or "not documented". Proof: [`probes/run-history/finding.md`](../probes/run-history/finding.md).
 - [ ] **spend-attribution**: OpenTelemetry to Grafana Cloud with the auth header in `OTEL_EXPORTER_OTLP_HEADERS`. If blocked, to the lab collector. Finding: the cost metric for one session, read by `ccr.session.id`.
-- [ ] **audit-record**: where the transcript lives, and whether a session command can edit or delete it. Finding: the record a compromised agent cannot erase, or none.
+- [x] **audit-record**: where the transcript lives, and whether a session command can edit or delete it. Finding: the record a compromised agent cannot erase, or none. Proof: [`probes/audit-record/finding.md`](../probes/audit-record/finding.md).
 - [ ] **github-start**: a workflow on the `factory` label calls the scheduled-task fire endpoint. Finding: a session starts from the label, or the error the endpoint returns.
 - [ ] **crash-resume**: kill a session mid-run from the UI, then resume. Finding: what survived: history, files, background shells, subagents.
 - [ ] **subagent-record**: spawn one subagent, then look for its transcript in the UI, under `~/.claude/projects/` in the VM, and after a teleport. Finding: where the subagent's record is, and whether it survives the VM.
