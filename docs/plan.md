@@ -44,8 +44,8 @@ One probe session per row, on issue #2's branch or on no branch. A probe never t
 
 ### Delivery run
 
-- [ ] The platform arm delivers a pull request on issue #1. Gates, review verdict, wall time and spend are recorded in `probes/delivery/platform.md`.
-- [ ] The cloud arm delivers a pull request on issue #1, started by the `github-start` path if it worked, else by `claude --cloud`. The same four values are in `probes/delivery/cloud.md`, with the start path named.
+- [ ] The platform arm delivers a pull request on issue #1. Gates, review verdict, wall time and spend are recorded in `probes/platform-delivery/finding.md`.
+- [ ] The cloud arm delivers a pull request on issue #1. The same four values are in `probes/cloud-delivery/finding.md`, with the start path named. The prompt is at `probes/cloud-delivery/prompt.md`. The delivery run starts from the web session picker, because the picker is the only place that pins the model to Sonnet 5.5 (see [`probes/cloud-environment/finding.md`](../probes/cloud-environment/finding.md)). The start mechanisms, `github-start` and `claude --cloud`, remain their own probe on issue #2. The Cloud arm's review verdict comes from a second Cloud session on the pull request branch. That session uses the review prompt from the factory's public review gate, in `probes/cloud-delivery/review-prompt.md`, so both arms score a separate review pass.
 - [ ] Both pull requests are open or merged on the target repo, side by side.
 
 ### Side experiment: the product behind `@claude`
