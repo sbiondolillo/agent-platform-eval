@@ -39,7 +39,7 @@ One probe session per row, on issue #2's branch or on no branch. A probe never t
 
    Completion criterion: `probes/cloud-logging/finding.md` states, for each of the four Cloud checks (steps 1 to 4), whether the error text is retrievable and by whom, with a capture file for each yes.
 
-- [ ] **substrate**: `uname -a`, `/proc/cpuinfo` hypervisor flags, `id`, `capsh --print`, `systemd-detect-virt`. Finding: who runs the code, as what user, with which capabilities.
+- [x] **substrate**: `uname -a`, `/proc/cpuinfo` hypervisor flags, `id`, `capsh --print`, `systemd-detect-virt`. Finding: who runs the code, as what user, with which capabilities. Proof: [`probes/substrate/finding.md`](../probes/substrate/finding.md).
 - [ ] **model-credential**: search environment, filesystem and process list for an Anthropic key or a token. Finding: what the VM holds, by shape only. No value is captured.
 - [ ] **forge-credential**: the same search for a GitHub credential, then `gh auth status` and the token's scopes. Finding: what the VM holds and its scope.
 - [ ] **vault-secret**: a network secret for a throwaway lab hostname. From inside the VM, `env` shows no value, and the endpoint's log shows the header present. Finding: where the key is attached.
