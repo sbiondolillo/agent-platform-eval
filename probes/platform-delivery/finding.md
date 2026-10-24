@@ -6,6 +6,29 @@ The Platform arm's delivery on issue #1 of `sbiondolillo/platform-eval-sample`.
 
 Dispatch: `gh workflow run factory.yml -f issue=1` at 17:42:31Z. Run: https://github.com/sbiondolillo/platform-eval-sample/actions/runs/40117342098. Factory at v1.2.1. Runner: sandbox-01. Model: claude-sonnet-5-5 through the gateway.
 
+## Attempt 2 (2026-10-24)
+
+Precondition: `geocoding-api.open-meteo.com` is in the sandbox-01 Squid allowlist.
+
+Dispatch: `gh workflow run factory.yml -f issue=1`. Run: https://github.com/sbiondolillo/platform-eval-sample/actions/runs/40118345316. Created 17:55:38Z. Finished 18:02:23Z. Conclusion: success. Wall time 6 min 45 s. Factory v1.2.1. Runner: sandbox-01. Model: claude-sonnet-5-5 through the gateway. The job rendered 7 steps live. The gate lines streamed in the log.
+
+| gate | wall time | turns | spend | result |
+|---|---|---|---|---|
+| plan | 27 s | 4 | $0.1014 | passed |
+| build 1 | 112 s | 9 | $0.2302 | lint and test passed |
+| test 1 | 17:58:24 to 17:58:41 | n/a | n/a | passed (integration project exited 0; the log prints no counts) |
+| review 1 | 34 s | 6 | $0.1310 | blocked |
+| build 2 (redo) | 36 s | 6 | $0.0733 | passed |
+| test 2 | 17:59:58 to 18:00:17 | n/a | n/a | passed |
+| review 2 | 25 s | 4 | $0.1155 | approved |
+| deliver and watch | 18:00:41 to 18:02:20 | n/a | n/a | "checks: green, unresolved threads: 0" |
+
+Agent spend sum: $0.6514. Gateway ledger, consumer dsf, 17:55:38 to 18:03:23 UTC: 28 calls, 973884 tokens, response_cost $0.651404. First call 17:55:59. Last call 18:00:41. The ledger equals the agent spend.
+
+PR: https://github.com/sbiondolillo/platform-eval-sample/pull/6. Branch factory/45752200. Created 18:00:44Z. Title: "A person can add a tracked location by name and list the tracked locations". Checks: build pass (39 s), integration pass (26 s).
+
+Review verdict: approved on review 2. Review 1 blocked.
+
 ## Session
 
 Date 2026-10-24. Model claude-sonnet-5-5 through the gateway. Run URL as above.
@@ -50,8 +73,8 @@ Consumer dsf, 17:42:00 to 17:50:00 UTC: 26 calls, 811088 tokens, $0.5289. First 
 
 ## Subagents
 
-Pending: whether the session used subagents, for what, and where their record is.
+Attempt 1 and attempt 2: none. The factory runs one agent per gate.
 
 ## Side effects
 
-Pending: branches and other changes the session made on the target repo.
+Attempt 2: none beyond the PR branch factory/45752200.
