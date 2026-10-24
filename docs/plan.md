@@ -42,7 +42,7 @@ One probe session per row, on issue #2's branch or on no branch. A probe never t
 - [x] **substrate**: `uname -a`, `/proc/cpuinfo` hypervisor flags, `id`, `capsh --print`, `systemd-detect-virt`. Finding: who runs the code, as what user, with which capabilities. Proof: [`probes/substrate/finding.md`](../probes/substrate/finding.md).
 - [x] **model-credential**: search environment, filesystem and process list for an Anthropic key or a token. Finding: what the VM holds, by shape only. No value is captured. Proof: [`probes/model-credential/finding.md`](../probes/model-credential/finding.md).
 - [x] **forge-credential**: the same search for a GitHub credential, then `gh auth status` and the token's scopes. Finding: what the VM holds and its scope. Proof: [`probes/forge-credential/finding.md`](../probes/forge-credential/finding.md).
-- [ ] **vault-secret**: a network secret for a throwaway lab hostname. From inside the VM, `env` shows no value, and the endpoint's log shows the header present. Finding: where the key is attached.
+- [x] **vault-secret**: a network secret for a throwaway lab hostname. From inside the VM, `env` shows no value, and the endpoint's log shows the header present. Finding: where the key is attached. Proof: [`probes/vault-secret/finding.md`](../probes/vault-secret/finding.md).
 - [ ] **egress**: Custom level with one allowed domain. `curl` to the allowed domain, to `open-meteo.com`, to a raw IP and to a port other than 443. Finding: what the proxy returns for each.
 - [ ] **tool-model-policy**: `/model` with a model outside the pin, and a tool call to an MCP server the environment does not configure. Finding: the control that stopped each, or none.
 - [ ] **run-history**: list sessions and download a transcript from outside the product, by API or CLI. Finding: the export path, or "not documented".
@@ -70,7 +70,7 @@ One probe session per row, on issue #2's branch or on no branch. A probe never t
 - [ ] The table in `site/` has sixteen rows and two columns. Every cell links its proof.
 - [ ] The report ends with the conditional: rows Cloud Sessions cover today, rows the factory owner must build under either choice, rows not documented and their probe result. Then one ladder rung per arm.
 - [ ] GitHub Pages serves `site/` from `main`, and the URL is in `README.md`.
-- [ ] The platform collector and the throwaway hostname are torn down. The Share scope of the Cloud delivery session is set back to Private. The teardown commit is cited here.
+- [ ] The platform collector and the throwaway hostname are torn down. The Share scope of the Cloud delivery session is set back to Private. The probe workflow `.github/workflows/probe-vault-secret.yml` is deleted from the sample repo. `PROBE_SECRET` is deleted from Infisical. The webhook.site network secret and allowed domain are removed from the Cloud environment. `webhook.site` is removed from the Squid allowlist. The teardown commit is cited here.
 
 ## Settled design
 
