@@ -2,6 +2,10 @@
 
 The to-do list comes first. The settled design follows as reference. A step is done when its completion criterion holds. Tick the box and write the proof on the same line.
 
+## Status 2026-10-24
+
+Both arms delivered issue #1 with an approved review. PR 5 (Cloud) and PR 6 (platform) stay open and unmerged as evidence. Both arms hit the same egress block on `geocoding-api.open-meteo.com`, and the operator widened both allowlists. After that, the Cloud egress path stalled intermittently for about 15 minutes. Live job steps on GitHub returned the same day. Next: the probe sessions on issue #2 (one per controls row), the fire endpoint start probe (`github-start`), the `@claude` side experiment, the Grafana Cloud OTel export, then the report table and the Pages site.
+
 ## To-do
 
 ### Setup
@@ -44,8 +48,8 @@ One probe session per row, on issue #2's branch or on no branch. A probe never t
 
 ### Delivery run
 
-- [ ] The platform arm delivers a pull request on issue #1. Gates, review verdict, wall time and spend are recorded in `probes/platform-delivery/finding.md`.
-- [ ] The cloud arm delivers a pull request on issue #1. The same four values are in `probes/cloud-delivery/finding.md`, with the start path named. The prompt is at `probes/cloud-delivery/prompt.md`. The delivery run starts from the web session picker, because the picker is the only place that pins the model to Sonnet 5.5 (see [`probes/cloud-environment/finding.md`](../probes/cloud-environment/finding.md)). The start mechanisms, `github-start` and `claude --cloud`, remain their own probe on issue #2. The Cloud arm's review verdict comes from a second Cloud session on the pull request branch. That session uses the review prompt from the factory's public review gate, in `probes/cloud-delivery/review-prompt.md`, so both arms score a separate review pass.
+- [x] The platform arm delivers a pull request on issue #1. Gates, review verdict, wall time and spend are recorded in `probes/platform-delivery/finding.md`. Proof: [PR 6](https://github.com/sbiondolillo/platform-eval-sample/pull/6) from attempt 2, review approved, 6 min 45 s, $0.6514 on the ledger, in [`probes/platform-delivery/finding.md`](../probes/platform-delivery/finding.md).
+- [x] The cloud arm delivers a pull request on issue #1. The same four values are in `probes/cloud-delivery/finding.md`, with the start path named. The prompt is at `probes/cloud-delivery/prompt.md`. The delivery run starts from the web session picker, because the picker is the only place that pins the model to Sonnet 5.5 (see [`probes/cloud-environment/finding.md`](../probes/cloud-environment/finding.md)). The start mechanisms, `github-start` and `claude --cloud`, remain their own probe on issue #2. The Cloud arm's review verdict comes from a second Cloud session on the pull request branch. That session uses the review prompt from the factory's public review gate, in `probes/cloud-delivery/review-prompt.md`, so both arms score a separate review pass. Proof: [PR 5](https://github.com/sbiondolillo/platform-eval-sample/pull/5) from the web picker, review `APPROVED`, build about 7 min, spend not exposed per session, in [`probes/cloud-delivery/finding.md`](../probes/cloud-delivery/finding.md).
 - [ ] Both pull requests are open or merged on the target repo, side by side.
 
 ### Side experiment: the product behind `@claude`

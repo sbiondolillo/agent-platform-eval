@@ -2,23 +2,41 @@
 
 The Cloud arm's delivery on issue #1 of `sbiondolillo/platform-eval-sample`, with the prompt in [`prompt.md`](prompt.md).
 
-## Attempt 1 (2026-10-24)
-
 ## Session
 
-Date 2026-10-24. Started from the web picker. Environment: agent-platform-eval. Repo: main. Model: Sonnet 5.5. Effort: default. Prompt from `prompt.md`, sent about 17:45 UTC. Session URL: not recorded.
+Date 2026-10-24. Environment: agent-platform-eval. Model: Sonnet 5.5, set in the web picker. Effort: default. The delivery took 4 Cloud sessions:
+
+| session title | role | notes |
+|---|---|---|
+| System environment check | environment probe | see [`probes/cloud-environment/finding.md`](../cloud-environment/finding.md) |
+| Platform eval sample issue #1 | delivery | started from the web picker on `main`, prompt from `prompt.md`, sent about 17:45 UTC. Session URL not recorded. |
+| Integration test run and timing | integration reruns | after the egress change, see below |
+| Build review for issue #1 | review | https://claude.ai/code/session_011T1eDpmxxffi9YkfUqbMeN, see below |
 
 ## Score
 
 | value | result |
 |---|---|
-| gates | build suite 14 passed, 0 failed. `dotnet build` 0 warnings. Integration suite in the Cloud sandbox: 4 failed. PR 5 CI on GitHub-hosted runners: `build` and `integration` passed. |
-| review verdict | pending (review-prompt.md session) |
-| wall time | not yet recorded |
-| spend | not yet recorded |
-| context percentage | not yet recorded |
+| gates | build suite 14 passed, 0 failed. `dotnet build` 0 warnings. Integration suite in the Cloud sandbox: flaky after the egress change, then 4 of 4 passed. PR 5 CI on GitHub-hosted runners: `build` and `integration` passed. |
+| delivery | https://github.com/sbiondolillo/platform-eval-sample/pull/5, after the operator granted the Claude GitHub App access to the repository |
+| review verdict | `APPROVED`, with "one minor non-blocking edge case noted" |
+| wall time | build: first prompt about 17:45 to PR 5 at 17:52 UTC, about 7 min including the access block. Agent work about 3.5 min. Review about 2 min. |
+| spend | not recorded. The Cloud UI shows no spend per session. The Cloud arm has no per-session cost readout equal to the platform arm's gateway ledger. |
+| context percentage | review session 9%. Not recorded for the other sessions. |
 
 ## Phases
+
+| phase | wall time | result |
+|---|---|---|
+| build (delivery session) | 17:45:38 to 17:48:44 | 14 passed, 0 failed. Push failed with 403. |
+| access block | 17:48:44 to about 17:51:52 | the operator granted the GitHub App access to the repository |
+| pull request | 17:51:52 to before 17:52:03 | PR 5 opened |
+| integration reruns | 18:01:12 to after run 4 | 3 of 4 passed three times, then 4 of 4 |
+| review | about 2 min, ended 18:08:52 | `APPROVED` |
+
+## Attempt 1 (2026-10-24)
+
+### Build phases
 
 Wall times are as the session reported them. The session ran `date -u` only at some boundaries.
 
@@ -53,6 +71,16 @@ The operator added `geocoding-api.open-meteo.com` to the environment's Allowed d
 - Run 4: total 4, passed 4, failed 0, skipped 0, 4.008 s.
 
 Reading: the Cloud egress path to an allowed host dropped or stalled requests intermittently over about 15 minutes. The client reports a stall as NoAnswer. The platform arm's proxy passed the same suite twice in attempt 2 (see probes/platform-delivery/finding.md). CI on GitHub-hosted runners passed the suite on PR 5.
+
+## Review
+
+Session: https://claude.ai/code/session_011T1eDpmxxffi9YkfUqbMeN, titled "Build review for issue #1". It was a fresh session on branch claude/compassionate-bell-0868na, Sonnet 5.5, with the prompt from [`review-prompt.md`](review-prompt.md).
+
+- The session ran 5 commands. 1 command failed. The failed command was most likely `gh issue view`. The prompt tells the session to fall back when that command fails.
+- The first line of the verdict was `APPROVED`. The prose approved the change with "one minor non-blocking edge case noted".
+- The final `date -u` was 18:08:52 UTC on 2026-10-24. The UI did not show the start time, so it was not captured. The review took about 2 min.
+- Context: 9%.
+- Spend: not recorded. The UI does not show it.
 
 ## Subagents
 
