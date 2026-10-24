@@ -10,7 +10,7 @@ The to-do list comes first. The settled design follows as reference. A step is d
 - [x] The target repo is public on GitHub, made from the starter at `dotnet-software-factory` tag `v1.1.0`, with `main` protected. Proof: https://github.com/sbiondolillo/platform-eval-sample, protection contexts `build` and `integration` read back, 2026-10-24.
 - [x] Issue #1 of the target repo carries the `forecast-sample` issue #1 text. Issue #2 is the probe issue, the factory's demo issue `--shout`. Proof: issues 1 and 2 on the target repo, 2026-10-24.
 - [x] The target repo's committed `.claude/settings.json` pins `claude-sonnet-5-5`. Proof: the first commit of the target repo.
-- [ ] A cloud environment exists for the target repo. Its setup script installs the .NET SDK that `global.json` pins, and a session runs `dotnet --version` with the pinned value.
+- [x] A cloud environment exists for the target repo. Its setup script installs the .NET SDK that `global.json` pins, and a session runs `dotnet --version` with the pinned value. Proof: [`probes/cloud-environment/finding.md`](../probes/cloud-environment/finding.md).
 
 ### Platform arm
 
@@ -81,7 +81,7 @@ Decided in a grilling session on 2026-10-24. Each line is a decision, with its r
 | target repo | `sbiondolillo/platform-eval-sample`, from the starter at `v1.1.0` |
 | cloud environment | to be filled when created |
 | throwaway hostname | to be filled when created |
-| model, both arms | `claude-sonnet-5-5`, hard-coded in the factory and pinned in the target's `.claude/settings.json` |
+| model, both arms | `claude-sonnet-5-5`, hard-coded in the factory and pinned in the target's `.claude/settings.json`. The pin did not apply to the Cloud session picker: see [the finding](../probes/cloud-environment/finding.md). |
 | credit expiry | 2026-11-05 |
 
 ## Sources
