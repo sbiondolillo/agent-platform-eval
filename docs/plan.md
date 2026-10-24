@@ -52,7 +52,7 @@ One probe session per row, on issue #2's branch or on no branch. A probe never t
 - [ ] **crash-resume**: kill a session mid-run from the UI, then resume. Finding: what survived: history, files, background shells, subagents. Interruption captured in [`probes/crash-resume/capture.md`](../probes/crash-resume/capture.md); the reclaim step is pending.
 - [x] **subagent-record**: spawn one subagent, then look for its transcript in the UI, under `~/.claude/projects/` in the VM, and after a teleport. Finding: where the subagent's record is, and whether it survives the VM. Proof: [`probes/subagent-record/finding.md`](../probes/subagent-record/finding.md).
 - [x] **toolchain**: the setup script's run time, its cache hit on the next session, and its expiry. Finding: the cost of a non-default toolchain. Proof: [`probes/toolchain/finding.md`](../probes/toolchain/finding.md).
-- [ ] **branch-protection**: push to the protected `main` from a session. Finding: the result, and whether required checks apply.
+- [x] **branch-protection**: push to the protected `main` from a session. Finding: the result, and whether required checks apply. Proof: [`probes/branch-protection/finding.md`](../probes/branch-protection/finding.md).
 - [ ] **setup-cost**: the steps and secrets from zero to the first delivered pull request, counted from the captures.
 
 ### Delivery run
@@ -70,7 +70,7 @@ One probe session per row, on issue #2's branch or on no branch. A probe never t
 - [ ] The table in `site/` has sixteen rows and two columns. Every cell links its proof.
 - [ ] The report ends with the conditional: rows Cloud Sessions cover today, rows the factory owner must build under either choice, rows not documented and their probe result. Then one ladder rung per arm.
 - [ ] GitHub Pages serves `site/` from `main`, and the URL is in `README.md`.
-- [ ] The platform collector and the throwaway hostname are torn down. The Share scope of the Cloud delivery session is set back to Private. The probe workflow `.github/workflows/probe-vault-secret.yml` is deleted from the sample repo. `PROBE_SECRET` is deleted from Infisical. The webhook.site network secret and allowed domain are removed from the Cloud environment. `webhook.site` is removed from the Squid allowlist. The teardown commit is cited here.
+- [ ] The platform collector and the throwaway hostname are torn down. The Share scope of the Cloud delivery session is set back to Private. The probe workflow `.github/workflows/probe-vault-secret.yml` is deleted from the sample repo. `PROBE_SECRET` is deleted from Infisical. The webhook.site network secret and allowed domain are removed from the Cloud environment. `webhook.site` is removed from the Squid allowlist. The empty probe commit c1c0122 on main of the sample repo stays as evidence. The teardown commit is cited here.
 
 ## Settled design
 
