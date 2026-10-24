@@ -39,6 +39,21 @@ In the Cloud sandbox, `dotnet run --no-restore -c Release --project tests/Integr
 
 The first prompt asked only for `dotnet test`. That command leaves the integration project out (IsTestProject false). The first report's pass count did not cover the integration suite. The follow-up prompt corrected it.
 
+## Integration suite after the egress change
+
+The operator added `geocoding-api.open-meteo.com` to the environment's Allowed domains at about 17:58 UTC on 2026-10-24. A new session on branch claude/compassionate-bell-0868na, Sonnet 5.5, ran the suite.
+
+- Run 0: `--no-restore` failed with NETSDK1004 because the fresh container had no restore. This was a prompt fault. The session corrected it with `dotnet restore`.
+- Run 1 (18:01:12 to 18:01:54): total 4, passed 3, failed 1 (SeveralPlacesHaveTheNameBoston, expected SeveralMatches, got NoAnswer), 33.3 s.
+- Run 2: total 4, passed 3, failed 1 (Boston, NoAnswer).
+- Run 3: total 4, passed 3, failed 1 (OnePlaceHasTheNameKathmandu, expected Found, got NoAnswer).
+- Each of runs 2 and 3 took 33 to 36 s.
+- `curl` to the geocoding search URL once returned `000 30.737103`, exit 35 (TLS handshake failure after 30 s). Three later curls returned 200 in 0.76 s, 0.89 s and 1.16 s.
+- The proxy status page inside the session showed `enabled: true` and `selective: false`. It has no per-host allowlist view and no per-host counters. `recentRelayFailures` had 19 entries. All were `connect_rejected` for dc.services.visualstudio.com:443 (CONNECT 403, .NET telemetry). None were for open-meteo.
+- Run 4: total 4, passed 4, failed 0, skipped 0, 4.008 s.
+
+Reading: the Cloud egress path to an allowed host dropped or stalled requests intermittently over about 15 minutes. The client reports a stall as NoAnswer. The platform arm's proxy passed the same suite twice in attempt 2 (see probes/platform-delivery/finding.md). CI on GitHub-hosted runners passed the suite on PR 5.
+
 ## Subagents
 
 None.
