@@ -1,25 +1,62 @@
 # Crash resume
 
-Probe for [crash-resume](../../docs/plan.md). Question: what survived an interruption: history, files, background shells, subagents. The answer sets whether DSF v2 can stop and continue a run on each arm, or must start it again.
+Probe for [crash-resume](../../docs/plan.md).
 
-## Cloud Sessions, interruption from the UI
+## The question
 
-The Stop button interrupts the current turn only, and the VM keeps running ([`capture.md`](capture.md)). After a Stop, the heartbeat loop and the background `sleep 600` were still running, and the untracked marker file was still on disk. The subagent's three files were unchanged, and the next message continued the same session with its full history. Two harness controls showed during the probe: the harness refused a foreground `sleep 180` before it ran, and a stop hook asked the session to commit and push the untracked files. Both controls change what a delivery run does, because a long foreground wait moves to a background task, and an untracked file triggers a request to commit it.
+What survives an interruption: history, files, background shells and subagents? The answer sets whether DSF v2 can stop and continue a run on each arm, or must start it again.
 
-## Cloud Sessions, after the container is reclaimed
+## Cloud Sessions
 
-Pending. The session is left idle; the step runs when the UI shows Connecting.
+Captures: [`capture.md`](capture.md). Session "Crash resume probe", 2026-10-24 from 23:26 UTC, and 2026-10-25 at about 01:23 UTC.
+
+### The Stop button
+
+The Stop button interrupts the current turn only, and the VM keeps running. Nothing was lost:
+
+- The heartbeat loop and the background `sleep 600` were still running.
+- The untracked marker file was still on disk.
+- The subagent's transcript, meta and prefix files were unchanged.
+- The next message continued the same session with its full history.
+
+### The idle reclaim
+
+The session was left idle after Message 4, answered at about 23:31. At about 01:23 its environment read "Connecting", and Message 4 was sent again. The session reconnected and answered.
+
+- The disk survived. The start file, the heartbeat log, the marker file and the subagent's three files were all unchanged since 23:26.
+- Every process died. The heartbeat's last log line is 23:41:49, so the reclaim came about eleven minutes after the answer at 23:31.
+- The shell snapshot file name changed, and the session directory's mtime is 01:23, the reconnect.
+- The background `sleep 600` had ended at about 23:37, so it proves nothing. The heartbeat is the process evidence.
+- The history survived. The session gave the subagent's two lines from its own transcript, and the UI showed the full conversation.
+
+So a session resumes on its own files and history after a reclaim. Any process it started must be started again.
+
+### Harness controls
+
+Two controls showed during the probe. The harness refused a foreground `sleep 180` before it ran, so a long wait moves to a background task. A stop hook asked the session to commit and push the untracked marker. It asked again after the reclaim, and the session declined each time. Both controls change what a delivery run does.
 
 ## Platform
 
-A factory run is one GitHub Actions job, started by an `issues: labeled` event or by `workflow_dispatch` (sample repo `.github/workflows/factory.yml` lines 7 to 18). Each run makes a new run id and a new temporary work tree (`src/Core/ConsoleCommands.cs:186-187` at `v1.2.1`), and each phase calls `claude -p` with no session flag (`src/Core/ClaudeCodeAgent.cs:36-44`). There is no resume code: a grep of `src/` for "resume", "Resume" and "continue" finds only `continue;` statements in loops, so a retry is a new run on a new branch `factory/<runId>` (`src/Core/Deliver.cs:24`). A failed run removes the container (`src/Core/Sandbox.cs:112-114`) and the work tree (`src/Core/ConsoleCommands.cs:197-200`), and leaves `.factory/sandbox-home/` with the transcripts on the runner until the next job's checkout. The source registers no signal handler, so a cancelled job can skip both removals, and this case was not tested.
+Capture: [`capture-platform.md`](capture-platform.md), read from `dotnet-software-factory` `v1.2.1`.
+
+A factory run is one GitHub Actions job. The container is a `docker run --detach ... sleep infinity` on `sandbox-01` (`src/Core/Sandbox.cs:46-65`). It is removed when the run ends (`src/Core/Sandbox.cs:112-114`), and the work tree is deleted too (`src/Core/ConsoleCommands.cs:197-200`). The factory has no resume code. A retry is a new run with a new run id and a new branch `factory/<runId>`.
+
+What remains after the job is what it pushed: the branch and the pull request. The job log stays 90 days ([`../cloud-logging/capture-platform.md`](../cloud-logging/capture-platform.md)). The v1.2.1 starter's store step saves the transcripts to a private repo ([`../run-history/finding.md`](../run-history/finding.md)). The sample repo uses the v1.1.0 starter, so its transcripts stay on `sandbox-01` until the next job's checkout.
+
+The source registers no signal handler. A cancelled job may skip the removal and leave the container running. This case was not tested.
 
 ## Comparison
 
-| Row | Cloud Sessions, interruption | Cloud Sessions, after reclaim | Platform |
+| Row | Cloud Sessions, Stop button | Cloud Sessions, idle reclaim | Platform |
 |---|---|---|---|
-| interrupt mid-run | the Stop button ends the turn. The VM keeps running. | pending | cancel the Actions job. No resume follows. |
-| resume after interrupt | yes: the next message continues the same session with its history | pending | none. No resume code. A retry is a new run with a new run id and branch. |
-| files after a crash | the untracked file survived | pending | a failed run deletes the work tree. `.factory/sandbox-home/` stays until the next checkout. A cancel was not tested. |
-| background processes after a crash | the heartbeat loop and the background sleep survived | pending | a failed run removes the container, so nothing keeps running. A cancel was not tested. |
-| subagents after a crash | the subagent's files survived, unchanged | pending | the subagent's files sit in `.factory/sandbox-home/` and stay until the next checkout |
+| interrupt mid-run | the Stop button ends the turn. The VM keeps running. | the container was reclaimed about eleven minutes after the last answer | cancel the Actions job. No resume follows. |
+| resume after interrupt | yes: the next message continues the same session | yes: the next message reconnects the session with its history | none. A retry is a new run with a new run id and branch. |
+| files after a crash | all survived | all survived | the work tree is deleted. Only pushed work and saved transcripts remain. |
+| background processes after a crash | all survived | all died | the container is removed, so nothing keeps running. A cancel was not tested. |
+| subagents after a crash | the files survived, unchanged | the files survived, and the session read the report from its history | the files are in the transcripts, kept by the store step |
+
+## Report cells
+
+Cloud: the Stop button loses nothing, and an idle reclaim keeps the disk and the history and kills every process, so a session resumes on its own files.
+
+Platform: a factory job has no resume; the container is removed at job end and only the pushed branch, the pull request and the saved transcript remain.

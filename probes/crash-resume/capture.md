@@ -1,6 +1,6 @@
 # Capture: crash-resume probe, Cloud session
 
-Probe [crash-resume](../../docs/plan.md), shared with [subagent-record](../subagent-record/capture.md). Session "Crash resume probe" on sbiondolillo/platform-eval-sample, model Sonnet 5.5 in the picker, environment agent-platform-eval. Taken 2026-10-24 from 23:26 UTC. Prompt: [`prompt.md`](prompt.md), four messages. The reclaim step is recorded at the end when it happens.
+Probe [crash-resume](../../docs/plan.md), shared with [subagent-record](../subagent-record/capture.md). Session "Crash resume probe" on sbiondolillo/platform-eval-sample, model Sonnet 5.5 in the picker, environment agent-platform-eval. Taken 2026-10-24 from 23:26 UTC, and 2026-10-25 at about 01:23 UTC after the reclaim. Prompt: [`prompt.md`](prompt.md), four messages. The reclaim step is recorded at the end.
 
 ## Message 1: set up state
 
@@ -119,8 +119,71 @@ subagent marker
 
 ## Reading so far
 
-The Stop button interrupts the turn and leaves the VM running. Every process, file and record survived it, and the session kept its history. The reclaim of the container is the crash the row asks about, and it is recorded below when it happens.
+The Stop button interrupts the turn and leaves the VM running. Every process, file and record survived it, and the session kept its history. The reclaim of the container is the crash the row asks about, and it is recorded below.
 
 ## After the container is reclaimed
 
-Pending.
+On 2026-10-25 at about 01:23 UTC, the operator opened the session in Recents, and its environment read "Connecting" after an idle reclaim. The operator sent Message 4 from [`prompt.md`](prompt.md) again, and the session reconnected and gave this reply.
+
+### 1. `cat /tmp/probe-start.txt; tail -3 /tmp/probe-heartbeat.log; pgrep -af probe-heartbeat | head -3`
+```
+Sat Oct 24 23:26:48 UTC 2026
+Sat Oct 24 23:41:39 UTC 2026
+Sat Oct 24 23:41:44 UTC 2026
+Sat Oct 24 23:41:49 UTC 2026
+192 /bin/bash -c source /root/.claude/shell-snapshots/snapshot-bash-1792891388341-vpga3j.sh 2>/dev/null || true && \builtin export BUN_OPTIONS="--smol${BUN_OPTIONS:+ $BUN_OPTIONS}" && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'cat /tmp/probe-start.txt; tail -3 /tmp/probe-heartbeat.log; pgrep -af probe-heartbeat | head -3' < /dev/null && pwd -P >| /tmp/claude-174c-cwd
+```
+The only match is the `pgrep` command's own shell (pid 192).
+
+### 2. `ls -la /home/user/platform-eval-sample/probe-crash-resume.txt; git -C /home/user/platform-eval-sample status --short`
+```
+-rw-r--r-- 1 root root 17 Oct 24 23:26 /home/user/platform-eval-sample/probe-crash-resume.txt
+?? probe-crash-resume.txt
+```
+
+### 3. `pgrep -af 'sleep 600' | head -3`
+```
+202 /bin/bash -c source /root/.claude/shell-snapshots/snapshot-bash-1792891388341-vpga3j.sh 2>/dev/null || true && \builtin export BUN_OPTIONS="--smol${BUN_OPTIONS:+ $BUN_OPTIONS}" && shopt -u extglob 2>/dev/null || true && { \builtin unalias -- 'unsetenv'; \builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'pgrep -af '"'"'sleep 600'"'"' | head -3' < /dev/null && pwd -P >| /tmp/claude-0fbc-cwd
+```
+Again the only match is the `pgrep` command's own shell (pid 202).
+
+### 4. `ls -la /root/.claude/projects/*/*/subagents/ | head -8`
+```
+total 280
+drwxr-xr-x 2 root root   4096 Oct 24 23:26 .
+drwx------ 3 root root   4096 Oct 25 01:23 ..
+-rw------- 1 root root 263076 Oct 24 23:26 agent-a1646aaea242de7e2.jsonl
+-rw-r--r-- 1 root root    217 Oct 24 23:26 agent-a1646aaea242de7e2.meta.json
+-rw-r--r-- 1 root root   5614 Oct 24 23:26 agent-a1646aaea242de7e2.prefix.json
+```
+
+### What survived
+- **Files on disk survived:**
+  - `/tmp/probe-start.txt` and `/tmp/probe-heartbeat.log` are intact.
+  - `probe-crash-resume.txt` is still there and untracked.
+  - The subagent transcript, meta and prefix files are unchanged since 23:26.
+- **The heartbeat process did not survive.** Its last log line is 23:41:49, and no process is running it now (pid 327 is gone). The shell-snapshot filename also changed (`1792884408675-kwhdf2` to `1792891388341-vpga3j`), and the session directory's mtime is Oct 25 01:23. Together these suggest the container or shell was restarted around then.
+- **The `sleep 600` is not running.** It had already completed at its 10-minute mark, so there is nothing left to survive.
+- **Repository:** I haven't committed, pushed or branched anything.
+
+### Subagent report from step 3 of your first message
+The report reached me as a message from the subagent, not in the tool result. Its two lines, exactly as given:
+
+```
+Sat Oct 24 23:26:51 UTC 2026
+subagent marker
+```
+
+I'm not committing or pushing. You told me not to, and the only untracked file is `probe-crash-resume.txt`, the marker you asked me to create. I haven't touched the repository or created a branch. If you want the hook satisfied, tell me to delete the marker or commit it.
+
+## Reading after the reclaim
+
+- The filesystem survived. `/tmp/probe-start.txt`, `/tmp/probe-heartbeat.log`, the untracked marker file and the subagent's three files are all unchanged since 23:26.
+- Every process died. The heartbeat's last log line is 23:41:49, and no heartbeat process runs now.
+- The heartbeat dates the reclaim to about 23:42. That is about eleven minutes after Message 4 was answered, at about 23:31.
+- The shell snapshot file name changed, and the session directory's mtime is 01:23, the time of the reconnect.
+- The background `sleep 600` had already ended at about 23:37, so it proves nothing here. The heartbeat is the process evidence.
+- The session history survived. The session gave the subagent's two lines from its own transcript, and the UI showed the full earlier conversation.
+- The stop hook re-prompted once more about the untracked marker, and the session declined again.
+
+So an idle reclaim of a Cloud session keeps the disk and the history, and loses every running process.
