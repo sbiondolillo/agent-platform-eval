@@ -1,6 +1,6 @@
 # Finding: spend-attribution
 
-The row asks whether the cost of one session can be read from an operator-owned store, keyed by the session id. Capture: [`capture.md`](capture.md), [`capture-platform.md`](capture-platform.md).
+The row asks whether the cost of one session can be read from an operator-owned store, keyed by the session id. Capture: [`capture.md`](capture.md) (Cloud), [`capture-workstation.md`](capture-workstation.md) (workstation bisect), [`capture-platform.md`](capture-platform.md) (platform). The store is a Grafana Cloud stack, ambercroissant1151.
 
 ## What the docs say
 
@@ -9,27 +9,39 @@ The docs were read after the first session, on 2026-10-24.
 - [Cloud environments](https://code.claude.com/docs/en/cloud-environments): a session passes the environment's values to the commands Claude runs, "except `OTEL_*` variables. Claude Code uses those for its own telemetry export and doesn't pass them to the commands it runs." The Bash result of every session matches this.
 - [Monitoring usage](https://code.claude.com/docs/en/monitoring-usage): telemetry from a cloud session is configured in the organization's server-managed settings, or in the environment's variables. A credential belongs in server-managed settings, because "Anyone who uses an environment can read its variables". The export "doesn't go through the agent proxy", and the collector host must be on the environment's allowlist. The session attribute is `ccr.session.id`, the value of `CLAUDE_CODE_REMOTE_SESSION_ID`.
 - [Settings](https://code.claude.com/docs/en/settings): the telemetry variables are dropped from a repository's `.claude/settings.json` `env` block, so a repository cannot turn telemetry on.
+- The Grafana Cloud "Claude Code" integration page (Connections > Add new connection > Claude Code) sets `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative` in its shell snippet. The Claude Code monitoring docs and the Grafana OpenTelemetry setup wizard do not mention temporality.
 
 ## Cloud Sessions
 
-Three sessions ran with the environment's variables as the route, the second documented one. The Claude Code process held none of the eight telemetry variables in any session, read from `/proc/<pid>/environ` by name. No metric reached the stack, with or without the header variable. The VM resolves no hostname without the proxy, so an export that bypasses the proxy has no route out of the VM. The proxy route itself is open: an empty POST through the network secret returned 200. The documented route did not work on 2026-10-25 and the docs do not explain the result. The other route, server-managed settings, needs an organization Owner and was not tried.
+Four sessions ran with the environment's variables as the route, the second documented one. Nothing was exported. The Claude Code process held none of the telemetry variables in any session, read from `/proc/<pid>/environ` by name. No metric reached the stack with the header variable, nor with cumulative temporality.
 
-Spend for a Cloud session is therefore read where Anthropic shows it: the account's usage view, which [`../cloud-logging/finding.md`](../cloud-logging/finding.md) records. The docs document no per-session cost figure outside the telemetry export.
+The workstation run proves the variables and the stack. The same variables, with cumulative temporality, landed seven series in the same stack. So the cause is upstream of the gateway: the process in the VM never received the variables. The VM also resolves no hostname without the proxy, so an export that bypasses the proxy has no route out.
+
+The other documented route, server-managed settings, needs an organization Owner and was not tried. Spend for a Cloud session is read where Anthropic shows it: the account's usage view, which [`../cloud-logging/finding.md`](../cloud-logging/finding.md) records.
 
 ## Platform
 
-DSF v1.2.1 starts the agent container with three names: `HOME`, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` (`src/Core/Sandbox.cs`). The `--pass-env` names go to the integration tests only. The agent has no telemetry variable and no route for one without a factory change. The factory owns the environment of the agent, so the change is one list in one file.
+The factory owns the environment of the agent. DSF v1.2.1 passes the agent container three names: `HOME`, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` (`src/Core/Sandbox.cs`). A throwaway branch adds eleven: nine telemetry names, `NO_PROXY` and `no_proxy`.
 
-Spend on the platform is read from the gateway ledger on llm-01, which holds every call with its cost. The cloud-logging probe summed one issue #2 delivery to $0.5289 over 26 calls. The key is the consumer and the time window. A `run_id` column exists and is empty ([`../run-history/finding.md`](../run-history/finding.md)).
+With that branch, the cost metric lands in Grafana keyed by `session_id`, one series per factory phase. The metric is a floor. The headless process exits without a final flush, so a phase loses up to one 10 s export interval and its last turn. One run matched the factory's log to four places; the other read low on every phase.
+
+The log events are exact. Loki holds one `api_request` event per API request, keyed by `session_id`, with model, tokens, `cost_usd` and latency. The sum of `cost_usd` over a session's events is the exact cost. The gateway ledger on llm-01 holds every call with its cost too, but its `run_id` column is empty ([`../run-history/finding.md`](../run-history/finding.md)).
+
+Two faults stood in the way:
+
+- Claude Code exports delta counters by default, and the Grafana gateway refuses them with 400. Only the Grafana integration page documents the fix, cumulative temporality.
+- The repository secret's first value was not a header pair, so the container sent no Authorization header. The relay saw 401 with `auth=absent`.
+
+The exporter is silent on failure in every arm. No log line, in the CLI or the Actions log, showed a refused export. The local relay, [`otlp-relay.py`](otlp-relay.py), was the only instrument that read the gateway's answer.
 
 ## Open
 
-- Why the environment's telemetry variables did not reach the Claude Code process is a question for Anthropic.
-- Server-managed settings as the route is untested.
-- A factory that passes the telemetry names to the agent would give the platform the per-session metric with `session.id`, from the same OpenTelemetry export, to a collector the lab owns.
+- Why the Claude Code process in a Cloud session got none of the environment's telemetry variables is a question for Anthropic.
+- Server-managed settings as the Cloud route is untested.
+- For DSF v2, a factory that passes the telemetry names natively. It sets cumulative temporality, and either flushes on exit or sums cost over the events.
 
 ## Report cells
 
-Cloud: the documented export route, telemetry variables on the environment, delivered nothing in three sessions, the Claude Code process held none of them, and spend is read only from Anthropic's usage view.
+Cloud: the documented environment route exported nothing in four sessions, the Claude Code process held none of the variables, and spend is read only from Anthropic's usage view.
 
-Platform: the gateway ledger holds every call with its cost, attributed by consumer and time window; DSF v1.2.1 passes no telemetry variable to the agent, which is one list in one file to change.
+Platform: with a nine-name pass-through in the factory, the cost metric and one event per API request land in the operator's Grafana keyed by session id, and the metric reads within one export interval of the factory's own log.

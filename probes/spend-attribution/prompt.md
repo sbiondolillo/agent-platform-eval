@@ -74,3 +74,23 @@ Same rules as before: no edits, commits, pushes or branches, each numbered comma
 ```
 {__name__=~"claude_code.*", ccr_session_id="<value of CLAUDE_CODE_REMOTE_SESSION_ID>"}
 ```
+
+## Fourth session
+
+The workstation bisect in [`capture-workstation.md`](capture-workstation.md) found that the gateway refuses delta counters. The operator added `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative` to the environment, eleven variables in all. Session "Spend attribution probe 4".
+
+```
+This is a probe for an experiment. Do not edit, commit, push or branch. Run each numbered command below in its own Bash call, then paste every output unedited in your reply with its command as a heading. Add no commentary beyond one sentence at the end.
+
+1. echo "remote session id: ${CLAUDE_CODE_REMOTE_SESSION_ID:-unset}"
+2. for i in 1 2 3 4; do date -u; sleep 12; done
+3. echo "remote session id: ${CLAUDE_CODE_REMOTE_SESSION_ID:-unset}"
+```
+
+### Grafana Explore query
+
+Range Last 15 minutes:
+
+```
+{__name__=~"claude_code.*", ccr_session_id="<value of CLAUDE_CODE_REMOTE_SESSION_ID>"}
+```

@@ -1,6 +1,6 @@
 # Capture: spend-attribution probe, Cloud sessions
 
-Probe [spend-attribution](../../docs/plan.md). Three sessions on sbiondolillo/platform-eval-sample, model Sonnet 5.5 in the picker, environment agent-platform-eval. Taken 2026-10-25 from 00:09 UTC. Prompts: [`prompt.md`](prompt.md). The environment held the seven OTEL variables from the plan and a network secret for host otlp-gateway-prod-us-east-2.grafana.net (header Authorization, prefix Basic). The replies are pasted unedited.
+Probe [spend-attribution](../../docs/plan.md). Four sessions on sbiondolillo/platform-eval-sample, model Sonnet 5.5 in the picker, environment agent-platform-eval. Taken 2026-10-25 from 00:09 UTC. Prompts: [`prompt.md`](prompt.md). The environment held the seven OTEL variables from the plan and a network secret for host otlp-gateway-prod-us-east-2.grafana.net (header Authorization, prefix Basic). The replies are pasted unedited.
 
 ## Session 1, "Spend attribution probe"
 
@@ -141,6 +141,44 @@ exit=0
 
 Only a bash process (pid 772, likely the scan's own shell) showed a telemetry-named variable, the direct POST failed DNS resolution, and the proxied POST returned 200.
 
+## Session 4, "Spend attribution probe 4"
+
+Before this session the workstation bisect in [`capture-workstation.md`](capture-workstation.md) found that the gateway refuses delta counters. The operator added `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative` to the environment, eleven variables in all. Taken 2026-10-25 at 00:46 UTC.
+
+## 1. `echo "remote session id: ${CLAUDE_CODE_REMOTE_SESSION_ID:-unset}"`
+```
+remote session id: cse_0175hRnZVhdzYK2JGHcGc1ob
+```
+
+## 2. `for i in 1 2 3 4; do date -u; sleep 12; done`
+```
+Sun Oct 25 00:46:19 UTC 2026
+Sun Oct 25 00:46:31 UTC 2026
+Sun Oct 25 00:46:43 UTC 2026
+Sun Oct 25 00:46:55 UTC 2026
+```
+
+## 3. `echo "remote session id: ${CLAUDE_CODE_REMOTE_SESSION_ID:-unset}"`
+```
+remote session id: cse_0175hRnZVhdzYK2JGHcGc1ob
+```
+
+The session id was the same before and after the 48-second loop.
+
+### Grafana Explore
+
+Range Last 15 minutes:
+
+| Query | Result |
+|---|---|
+| `{__name__=~"claude_code.*", ccr_session_id="cse_0175hRnZVhdzYK2JGHcGc1ob"}` | No data |
+
+The same variables exported from the workstation produced series in this stack ([`capture-workstation.md`](capture-workstation.md)). So the variables and the stack are sound, and the Cloud result stands.
+
 ## Reading
 
-The Bash tool's shell gets the environment's variables minus every `OTEL_` name, which the cloud-environments doc states. The Claude Code process, the one that would export, holds none of the eight telemetry variables in any of the three sessions. The gateway received no metric after the header variable was added, so the missing header was not the cause. The VM has no DNS, so an export that bypasses the agent proxy, as the monitoring doc describes, has no route out. The proxied route works: an empty POST through the network secret returned 200 in both sessions that tried it.
+The Bash tool's shell gets the environment's variables minus every `OTEL_` name, which the cloud-environments doc states. The Claude Code process, the one that would export, held none of the telemetry variables in any session. Nothing was exported by the documented environment route in four sessions.
+
+Two candidate causes were ruled out. The missing header was not the cause: session 3 added it and nothing arrived. Delta temporality was not the cause: session 4 set cumulative and nothing arrived. The same variables work from the workstation, against the same stack. The cause is upstream of the gateway: the process in the VM never received the variables.
+
+The VM has no DNS, so an export that bypasses the agent proxy, as the monitoring doc describes, has no route out. The proxied route works: an empty POST through the network secret returned 200 in both sessions that tried it. The Grafana Cloud stack ambercroissant1151 never received a Cloud session metric.
