@@ -8,6 +8,8 @@ Every cell on the Cloud Sessions side is proven by a probe run in the real produ
 |---|---|
 | `docs/plan.md` | the to-do list, the settled design and the row list. Read it first |
 | `probes/<row>/` | one directory per row: the prompt or script, and the captured output |
-| `site/` | the Pages site that renders the table and the captures |
+| `site/` | the report page, built by `sh site/src/build.sh` from `site/src/report.src.html` and the report cells of every finding. Never edit `site/index.html`. |
+
+The report is published at https://sbiondolillo.github.io/agent-platform-eval/ .
 
 The platform arm is the factory at `v1.1.0` on a self-hosted runner in a lab VM. The target repo for both arms is named in `docs/plan.md` once it exists.
