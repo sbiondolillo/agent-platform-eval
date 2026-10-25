@@ -4,7 +4,7 @@ The to-do list comes first. The settled design follows as reference. A step is d
 
 ## Status 2026-10-25
 
-Both arms delivered issue #1 with an approved review. PR 5 (Cloud) and PR 6 (platform) stay open and unmerged as evidence. On 2026-10-24 the issue #2 probes ran for thirteen rows: cloud-logging, substrate, model-credential, forge-credential, vault-secret, egress, tool-model-policy, run-history, audit-record, subagent-record, toolchain, branch-protection and github-start, plus the `@claude` side experiment. Each has `probes/<row>/finding.md` and a tick below. Three controls fired on probe prompts and are recorded in `probes/audit-record/finding.md`. Open: crash-resume completed on 2026-10-25 after the idle reclaim; spend-attribution ran on 2026-10-25 against a Grafana Cloud stack (ambercroissant1151, trial ends 2026-11-07): nothing from a Cloud session, and the platform's per-session cost metric and events from a throwaway factory branch; setup-cost is a count over the captures; then the report table, the Pages site and the teardown. The teardown item below lists every throwaway made on 2026-10-24.
+Both arms delivered issue #1 with an approved review. PR 5 (Cloud) and PR 6 (platform) stay open and unmerged as evidence. On 2026-10-24 the issue #2 probes ran for thirteen rows: cloud-logging, substrate, model-credential, forge-credential, vault-secret, egress, tool-model-policy, run-history, audit-record, subagent-record, toolchain, branch-protection and github-start, plus the `@claude` side experiment. Each has `probes/<row>/finding.md` and a tick below. Three controls fired on probe prompts and are recorded in `probes/audit-record/finding.md`. Open: crash-resume completed on 2026-10-25 after the idle reclaim; spend-attribution ran on 2026-10-25 against a Grafana Cloud stack (ambercroissant1151, trial ends 2026-11-07): nothing from a Cloud session, and the platform's per-session cost metric and events from a throwaway factory branch; setup-cost is counted; then the report table, the Pages site and the teardown. The teardown item below lists every throwaway made on 2026-10-24.
 
 ## To-do
 
@@ -53,7 +53,7 @@ One probe session per row, on issue #2's branch or on no branch. A probe never t
 - [x] **subagent-record**: spawn one subagent, then look for its transcript in the UI, under `~/.claude/projects/` in the VM, and after a teleport. Finding: where the subagent's record is, and whether it survives the VM. Proof: [`probes/subagent-record/finding.md`](../probes/subagent-record/finding.md).
 - [x] **toolchain**: the setup script's run time, its cache hit on the next session, and its expiry. Finding: the cost of a non-default toolchain. Proof: [`probes/toolchain/finding.md`](../probes/toolchain/finding.md).
 - [x] **branch-protection**: push to the protected `main` from a session. Finding: the result, and whether required checks apply. Proof: [`probes/branch-protection/finding.md`](../probes/branch-protection/finding.md).
-- [ ] **setup-cost**: the steps and secrets from zero to the first delivered pull request, counted from the captures.
+- [x] **setup-cost**: the steps and secrets from zero to the first delivered pull request, counted from the captures. Proof: [`probes/setup-cost/finding.md`](../probes/setup-cost/finding.md). Result: Cloud took 25 operator steps and 4 secrets, and the platform took 28 operator steps and 0 new secrets on top of 9 lab items and 4 secrets already in place.
 
 ### Delivery run
 
