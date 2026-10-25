@@ -21,7 +21,10 @@ The runner host `sandbox-01` carries two GitHub credentials, and neither enters 
 | lifetime | the session's grant, mediated by the proxy; not read by this probe | PAT: a long-lived token rotated by the operator in GitHub settings. Actions token: expires at job end, at most 24 hours on a self-hosted runner. |
 | where the secret lives | not on disk in the sandbox; held by the managed proxy and injected per request | the PAT in the Infisical `dsf` project, read by machine identity `dsf-sandbox01` through the host file `/etc/homelab/dsf/.infisical-auth.env`. The Actions token is minted by GitHub per job. |
 
-Cell for the report, Cloud Sessions: the sandbox holds no token on disk, but the managed proxy injects the operator's own account credential with admin on the one granted repo, scoped away from the owner's other repos until `add_repo` is called.
-Cell for the report, Platform: the agent's container holds no forge credential at all; the operator's fine-grained PAT and a job-scoped Actions token both sit in the factory process on the host, and the pull request is opened under the operator account.
-
 The attempt 1 refusal is itself a reading for the [tool-model-policy](../../docs/plan.md) row: the model-side safeguard stopped a self-directed credential sweep and switched models, where the identical sweep for an Anthropic key one probe earlier was answered.
+
+## Report cells
+
+Cloud: the sandbox holds no token on disk, but the managed proxy injects the operator's own account credential with admin on the one granted repo, scoped away from the owner's other repos until `add_repo` is called.
+
+Platform: the agent's container holds no forge credential at all; the operator's fine-grained PAT and a job-scoped Actions token both sit in the factory process on the host, and the pull request is opened under the operator account.

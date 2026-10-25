@@ -23,5 +23,8 @@ The factory builds the sandbox image itself on the runner host, from `sandbox/Do
 
 Two differences matter for DSF v2. First, Cloud Sessions rebuilds the toolchain on its own, on a change or after about seven days, while the platform image stays as built until someone deletes it, so a new Claude Code release or SDK patch does not reach the platform by itself. Second, the Cloud toolchain lives in a web dialog outside version control, while the platform toolchain is a Dockerfile in the factory repo at a release tag.
 
-Cell for the report, Cloud Sessions: a setup script in the environment installs the SDK once, and later sessions start from a filesystem snapshot that the docs say is rebuilt on a script or allowlist change and after about seven days, but the UI shows no setup duration.
-Cell for the report, Platform: the factory builds a 2.11 GB image from its own Dockerfile on the runner host at first use in about 66 s, each job then pays about 16 s of toolchain setup, and the image never expires and changes only when someone deletes it.
+## Report cells
+
+Cloud: a setup script in the environment installs the SDK once, and later sessions start from a filesystem snapshot that the docs say is rebuilt on a script or allowlist change and after about seven days, but the UI shows no setup duration.
+
+Platform: the factory builds a 2.11 GB image from its own Dockerfile on the runner host at first use in about 66 s, each job then pays about 16 s of toolchain setup, and the image never expires and changes only when someone deletes it.

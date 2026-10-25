@@ -31,5 +31,8 @@ Capture: [`capture-platform.md`](capture-platform.md).
 
 The environment variable names from line 11 feed the model-credential and forge-credential probes: in the Cloud session `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `CLOUDSDK_AUTH_ACCESS_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`, `CLAUDE_CODE_MESSAGING_TOKEN`, `ANTHROPIC_BASE_URL` and `HTTPS_PROXY` are present by name, and in the platform container `ANTHROPIC_API_KEY`, `ANTHROPIC_BASE_URL` and `HTTPS_PROXY` are present by name in a real run.
 
-Cell for the report, Cloud Sessions: the agent runs as root with `cap_sys_admin` inside its own Firecracker microVM, so the VM boundary is the whole isolation.
-Cell for the report, Platform: the agent runs as an unprivileged uid with Docker's default capabilities in a container that shares the runner VM's kernel, so the container and the VM are two boundaries, and the factory sets none of the container's confinement itself.
+## Report cells
+
+Cloud: the agent runs as root with `cap_sys_admin` inside its own Firecracker microVM, so the VM boundary is the whole isolation.
+
+Platform: the agent runs as an unprivileged uid with Docker's default capabilities in a container that shares the runner VM's kernel, so the container and the VM are two boundaries, and the factory sets none of the container's confinement itself.

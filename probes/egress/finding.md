@@ -29,5 +29,8 @@ The container's traffic goes to Squid on `egress-01`, which allows hosts per sou
 
 Two differences matter for DSF v2. First, the allow rule: Cloud Sessions allows an exact hostname set in the environment, with a toggle for package managers, while the platform allows hosts per source address on a Squid list that the operator edits by hand for each new host. Second, the direct path: Cloud Sessions intercepts direct port 443 at its gateway, which accepts the handshake and answers itself, while the platform drops the connection at the firewall. Both stop the data, but on Cloud Sessions a test that checks only the TCP handshake reports the path as open.
 
-Cell for the report, Cloud Sessions: a local relay tunnels HTTPS only to exact allowed hostnames on port 443, and the gateway intercepts every direct port 443 connection and answers it itself, so no request reaches the internet except through the relay.
-Cell for the report, Platform: Squid tunnels only to the hosts on the runner's per-source allowlist, which the operator edits by hand, and the firewall drops every direct connection, so Squid is the only path out.
+## Report cells
+
+Cloud: a local relay tunnels HTTPS only to exact allowed hostnames on port 443, and the gateway intercepts every direct port 443 connection and answers it itself, so no request reaches the internet except through the relay.
+
+Platform: Squid tunnels only to the hosts on the runner's per-source allowlist, which the operator edits by hand, and the firewall drops every direct connection, so Squid is the only path out.

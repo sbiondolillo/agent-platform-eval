@@ -48,4 +48,8 @@ Capture: [`capture-platform.md`](capture-platform.md).
 | 5 | GitHub job log, run 40117342098 | yes, with stack trace | any signed-in GitHub account with read access to the public repo | 90 days, to on or about 2027-01-22 |
 | 5 | Gateway ledger, `telemetry.gateway_calls` | no, spend only | the lab operator, over `mcp_ro` from the Management VLAN | as long as the table. No row is deleted. |
 
-Cloud Sessions keep the error text in the server-side transcript, readable by signed-in accounts through the web UI, the Share link and the CLI; nothing is exported to disk.
+## Report cells
+
+Cloud: Cloud Sessions keep the error text in the server-side transcript, readable by signed-in accounts through the web UI, the Share link and the CLI; nothing is exported to disk.
+
+Platform: the GitHub job log holds the 403 line and the stack trace for 90 days, readable by any signed-in GitHub account, and the gateway ledger holds the run's calls and spend but not the failure.

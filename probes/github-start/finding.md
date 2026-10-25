@@ -22,4 +22,8 @@ The `factory` label on an issue starts the delivery run on the self-hosted runne
 | where the result lands | in the session at claude.ai/code, under the task's History. GitHub gets only what the prompt tells the session to post. | the pull request, the job log, and the gateway ledger |
 | retry semantics | no idempotency key: each POST starts a new session. Limits 30 fires an hour per task, 100 an hour per account. A wrong token returns HTTP 401 and starts nothing. | "Re-run" on the Actions run, or `gh workflow run factory.yml`. Each attempt is a new job. |
 
-Report cells. Cloud Sessions: a label can start a Cloud session, but only through a GitHub job that the repo owner writes and that holds a per-task bearer token, and the session's reply stays at claude.ai/code unless the prompt posts it back. Platform: the `factory` label starts the delivery run on the self-hosted runner directly through the workflow's `issues: labeled` trigger, gated to the repo owner, with no start credential.
+## Report cells
+
+Cloud: a label can start a Cloud session, but only through a GitHub job that the repo owner writes and that holds a per-task bearer token, and the session's reply stays at claude.ai/code unless the prompt posts it back.
+
+Platform: the `factory` label starts the delivery run on the self-hosted runner directly through the workflow's `issues: labeled` trigger, gated to the repo owner, with no start credential.

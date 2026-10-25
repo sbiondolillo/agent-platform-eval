@@ -21,5 +21,8 @@ Infisical holds the secret as `PROBE_SECRET` in the `dsf` project, environment `
 | credential types the vault can attach | nine: Bearer, Basic, Body parameter, AWS SigV4, GCP access token, GCP IAP, OAuth 2.0 JWT bearer, OAuth 2.0 client credentials, MCP Connector | any string. The vault attaches nothing: the script does, so a signing or token-exchange scheme is code the factory owner writes. |
 | operator steps for this probe | 2, in one dialog: add the secret, with its allowed website and header | 4: add the secret in Infisical, widen the Squid allowlist, merge the workflow, dispatch it |
 
-Cell for the report, Cloud Sessions: the managed proxy attaches the secret on the way out and only to its allowed hosts, so the agent's VM never holds a value it can read.
-Cell for the report, Platform: `infisical run` puts the secret in the runner job's environment, so the factory process can read it and must attach it itself, and the agent's container gets it only when the factory passes it by name.
+## Report cells
+
+Cloud: the managed proxy attaches the secret on the way out and only to its allowed hosts, so the agent's VM never holds a value it can read.
+
+Platform: `infisical run` puts the secret in the runner job's environment, so the factory process can read it and must attach it itself, and the agent's container gets it only when the factory passes it by name.

@@ -19,5 +19,8 @@ The factory sets the agent's `HOME` to a host directory under the job workspace,
 | survives the sandbox | the file in the VM goes with the container (reclaim step pending). The server-side transcript holds at least the report. Teleport writes no file. | yes, on the runner host, until the next job's `git clean -ffdx`. No store step in the sample workflow. |
 | per-call record | not exposed per session | the gateway ledger, one row per call under `dsf`. Subagent calls not distinguished from the parent's. |
 
-Cell for the report, Cloud Sessions: the subagent keeps its own transcript in the VM's session folder, and the server-side transcript keeps its report and a row with its model, but whether the subagent's own transcript outlives the container is pending the reclaim step.
-Cell for the report, Platform: the subagent's transcript lands beside the parent's on the runner host until the next job, it is never uploaded without the v1.2.1 store step, and the gateway ledger counts its calls under `dsf` with no link to the parent.
+## Report cells
+
+Cloud: the subagent keeps its own transcript in the VM's session folder, and the server-side transcript keeps its report and a row with its model, but whether the subagent's own transcript outlives the container is pending the reclaim step.
+
+Platform: the subagent's transcript lands beside the parent's on the runner host until the next job, it is never uploaded without the v1.2.1 store step, and the gateway ledger counts its calls under `dsf` with no link to the parent.

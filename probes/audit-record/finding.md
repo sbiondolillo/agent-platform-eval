@@ -28,5 +28,8 @@ The platform arm has no equivalent of any of the three.
 | per-call record | not exposed per session | the gateway ledger, one row per model call under `dsf`, written on `llm-01` |
 | retention | not documented. The server transcript outlived the container. | job log 90 days. Ledger: 90 days hot, then cold, no delete. Transcript until the next job on the runner. |
 
-Cell for the report, Cloud Sessions: the in-VM transcript is root-writable and only the auto-mode classifier stopped an append and a delete, so the record a compromised agent cannot erase is the server-side transcript outside the VM.
-Cell for the report, Platform: the agent can edit or delete its own transcript on the runner with no control, so the records it cannot erase are the host-written job log, pull request history and the gateway's per-call ledger.
+## Report cells
+
+Cloud: the in-VM transcript is root-writable and only the auto-mode classifier stopped an append and a delete, so the record a compromised agent cannot erase is the server-side transcript outside the VM.
+
+Platform: the agent can edit or delete its own transcript on the runner with no control, so the records it cannot erase are the host-written job log, pull request history and the gateway's per-call ledger.

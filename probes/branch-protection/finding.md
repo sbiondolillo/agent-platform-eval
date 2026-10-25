@@ -22,5 +22,8 @@ The factory never pushes to `main`. At `v1.2.1` it pushes only a `factory/<id>` 
 
 Action, a build item under either outcome: turn on "Do not allow bypassing the above settings" on the `main` protection, or move it to a ruleset with no bypass actors, or push from an identity that is not an administrator.
 
-Cell for the report, Cloud Sessions: the session pushed to protected `main` and the push landed as an administrator bypass, because the proxy pushes as the operator's admin account and the protection lets administrators bypass, so the protection does not bind the agent.
-Cell for the report, Platform: the factory's source pushes only its own branch and opens a pull request, so the required checks apply at the merge, but the PAT is on the same admin account and the protection would not stop a direct push.
+## Report cells
+
+Cloud: the session pushed to protected `main` and the push landed as an administrator bypass, because the proxy pushes as the operator's admin account and the protection lets administrators bypass, so the protection does not bind the agent.
+
+Platform: the factory's source pushes only its own branch and opens a pull request, so the required checks apply at the merge, but the PAT is on the same admin account and the protection would not stop a direct push.

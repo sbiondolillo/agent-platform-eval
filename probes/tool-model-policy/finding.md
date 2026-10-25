@@ -22,5 +22,8 @@ The factory picks the model in code: one constant, `claude-sonnet-5-5`, at `src/
 | what stops a new server's egress | the egress relay, 403 on CONNECT to `mcp.deepwiki.com` | Squid, 403 to any host not on the shared or `sandbox01` list. A stdio server from an allowed registry is not stopped. |
 | a content safeguard observed | yes. A model-side safeguard refused a credential sweep and switched the session to Sonnet 5. It acts on the prompt. | none observed |
 
-Cell for the report, Cloud Sessions: the operator picks any of twelve models with no control and the account's connectors set the tools, so the only controls observed were the egress relay, the start-time tool loading and a model-side safeguard that acts on prompt content.
-Cell for the report, Platform: the factory fixes the model and the tools in code and Squid stops a new remote server, but the agent holds a gateway key with no model list and runs with every tool allowed, so it can call any gateway model on its own.
+## Report cells
+
+Cloud: the operator picks any of twelve models with no control and the account's connectors set the tools, so the only controls observed were the egress relay, the start-time tool loading and a model-side safeguard that acts on prompt content.
+
+Platform: the factory fixes the model and the tools in code and Squid stops a new remote server, but the agent holds a gateway key with no model list and runs with every tool allowed, so it can call any gateway model on its own.

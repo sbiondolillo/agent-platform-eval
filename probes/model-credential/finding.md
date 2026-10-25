@@ -28,5 +28,8 @@ Capture: [`capture-platform.md`](capture-platform.md).
 | where the vendor key lives | not visible. The VM holds an account OAuth token, not a vendor API key. | in the `litellm` Infisical project, read by the gateway on `llm-01`. Never on sandbox-01. |
 | does the model path go through the egress proxy | no. `api.anthropic.com` is on `NO_PROXY`, so model calls skip the local proxy at `127.0.0.1:33511`. | no. `10.99.0.186` is on `NO_PROXY`, and the call goes direct to the gateway through one firewall permit. The vendor host is denied by Squid. |
 
-Cell for the report, Cloud Sessions: the VM holds the account's OAuth token in a file that the root agent can read, and model calls skip the egress proxy, so the credential that the agent can read has the reach of the whole account.
-Cell for the report, Platform: the container holds only a lab gateway key, usable from inside the lab and logged per call, and the vendor key never enters the Sandbox VLAN, but the gateway sets no budget or model list on that key.
+## Report cells
+
+Cloud: the VM holds the account's OAuth token in a file that the root agent can read, and model calls skip the egress proxy, so the credential that the agent can read has the reach of the whole account.
+
+Platform: the container holds only a lab gateway key, usable from inside the lab and logged per call, and the vendor key never enters the Sandbox VLAN, but the gateway sets no budget or model list on that key.

@@ -26,5 +26,8 @@ The gateway ledger, `telemetry.gateway_calls`, holds one row per model call with
 | retention | per account: 30 days, or 5 years on a consumer plan that allows model improvement. Deleting a session removes its data. | job log 90 days. Store repo until deleted. Ledger keeps every row, cold after 90 days. Runner host until the next run. |
 | documented API | none for listing or reading. Only the scheduled-task `/fire` endpoint, which starts a session. | GitHub REST for runs, logs and artifacts. The ledger is our own ClickHouse table. |
 
-Cell for the report, Cloud Sessions: sessions are listed and read only inside the product, in the web UI, the Share link, `claude --teleport` and the in-session MCP tools, and no documented API or CLI command lists them or exports a transcript to a file.
-Cell for the report, Platform: `gh` lists the runs and downloads the 90-day job log, the gateway ledger holds every model call, and the model transcripts are files that the v1.2.1 starter pushes to a private store repo, but this target repo's v1.1.0 workflow has no store step, so they stay on the runner host only until the next run.
+## Report cells
+
+Cloud: sessions are listed and read only inside the product, in the web UI, the Share link, `claude --teleport` and the in-session MCP tools, and no documented API or CLI command lists them or exports a transcript to a file.
+
+Platform: `gh` lists the runs and downloads the 90-day job log, the gateway ledger holds every model call, and the model transcripts are files that the v1.2.1 starter pushes to a private store repo, but this target repo's v1.1.0 workflow has no store step, so they stay on the runner host only until the next run.
