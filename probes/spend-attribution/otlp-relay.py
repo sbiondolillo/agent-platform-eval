@@ -5,7 +5,8 @@ Listens on all interfaces on port 4318. Forwards every POST to the Grafana Cloud
 gateway with the Authorization header taken from OTEL_EXPORTER_OTLP_HEADERS
 in the environment. Prints, per request: client address, time, path, content type, body
 size, upstream status, and the first 300 bytes of the upstream body. It
-never prints a header value.
+never prints a header value. With PROBE_PASSTHROUGH=1 it forwards the
+sender's own Authorization header unchanged and adds none of its own.
 urllib honours an https_proxy variable in the environment, so the relay needs no proxy code.
 """
 import os
@@ -16,11 +17,15 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 UPSTREAM = "https://otlp-gateway-prod-us-east-2.grafana.net/otlp"
+PASSTHROUGH = os.environ.get("PROBE_PASSTHROUGH") == "1"
 raw = os.environ.get("OTEL_EXPORTER_OTLP_HEADERS", "")
-if "=" not in raw:
+if PASSTHROUGH:
+    name, value = "", ""
+elif "=" not in raw:
     sys.exit("OTEL_EXPORTER_OTLP_HEADERS is not set in this shell")
-name, value = raw.split("=", 1)
-value = value.replace("%20", " ")
+else:
+    name, value = raw.split("=", 1)
+    value = value.replace("%20", " ")
 
 
 class Relay(BaseHTTPRequestHandler):
@@ -30,7 +35,18 @@ class Relay(BaseHTTPRequestHandler):
         ctype = self.headers.get("Content-Type", "")
         req = urllib.request.Request(UPSTREAM + self.path, data=body, method="POST")
         req.add_header("Content-Type", ctype)
-        req.add_header(name.strip(), value.strip())
+        note = ""
+        if PASSTHROUGH:
+            # Forward the sender's own Authorization header unchanged. Print
+            # only its presence, its length and whether it holds a %20.
+            incoming = self.headers.get("Authorization")
+            if incoming:
+                req.add_header("Authorization", incoming)
+                note = f" auth=present len={len(incoming)} pct20={'%20' in incoming}"
+            else:
+                note = " auth=absent"
+        else:
+            req.add_header(name.strip(), value.strip())
         try:
             with urllib.request.urlopen(req, timeout=20) as r:
                 status, text = r.status, r.read(300)
@@ -38,7 +54,7 @@ class Relay(BaseHTTPRequestHandler):
             status, text = e.code, e.read(300)
         except Exception as e:  # noqa: BLE001
             status, text = 0, repr(e).encode()
-        print(f"{self.client_address[0]} {time.strftime('%H:%M:%S')} {self.path} {ctype} {size} B -> {status} {text!r}", flush=True)
+        print(f"{self.client_address[0]} {time.strftime('%H:%M:%S')} {self.path} {ctype} {size} B -> {status} {text!r}{note}", flush=True)
         self.send_response(status if status else 502)
         self.end_headers()
 
