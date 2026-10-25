@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """A local OTLP relay for the spend-attribution probe.
 
-Listens on 127.0.0.1:4318. Forwards every POST to the Grafana Cloud OTLP
+Listens on all interfaces on port 4318. Forwards every POST to the Grafana Cloud OTLP
 gateway with the Authorization header taken from OTEL_EXPORTER_OTLP_HEADERS
-in the environment. Prints, per request: time, path, content type, body
+in the environment. Prints, per request: client address, time, path, content type, body
 size, upstream status, and the first 300 bytes of the upstream body. It
 never prints a header value.
+urllib honours an https_proxy variable in the environment, so the relay needs no proxy code.
 """
 import os
 import sys
@@ -37,7 +38,7 @@ class Relay(BaseHTTPRequestHandler):
             status, text = e.code, e.read(300)
         except Exception as e:  # noqa: BLE001
             status, text = 0, repr(e).encode()
-        print(f"{time.strftime('%H:%M:%S')} {self.path} {ctype} {size} B -> {status} {text!r}", flush=True)
+        print(f"{self.client_address[0]} {time.strftime('%H:%M:%S')} {self.path} {ctype} {size} B -> {status} {text!r}", flush=True)
         self.send_response(status if status else 502)
         self.end_headers()
 
@@ -45,5 +46,5 @@ class Relay(BaseHTTPRequestHandler):
         pass
 
 
-print("relay on http://127.0.0.1:4318 -> " + UPSTREAM, flush=True)
-HTTPServer(("127.0.0.1", 4318), Relay).serve_forever()
+print("relay on http://0.0.0.0:4318 -> " + UPSTREAM, flush=True)
+HTTPServer(("0.0.0.0", 4318), Relay).serve_forever()
