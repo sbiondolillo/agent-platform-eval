@@ -1,0 +1,3 @@
+# Capture: spend-attribution probe, platform arm
+
+Probe [spend-attribution](../../docs/plan.md). The platform arm needs no new run: the gateway ledger on llm-01 already attributes spend per call, and the cloud-logging probe read it for the platform delivery of issue #2 on 2026-10-24. Its 26 calls and the sum of $0.5289, every row `success`, are in [`../cloud-logging/capture-platform.md`](../cloud-logging/capture-platform.md). The ledger keys each row by the gateway consumer and the model. It has no parent, agent or `run_id` column, so one factory job is read by its time window and consumer, not by a session id ([`../run-history/capture-platform.md`](../run-history/capture-platform.md)).
