@@ -23,7 +23,7 @@ The other documented route, server-managed settings, needs an organization Owner
 
 The factory owns the environment of the agent. DSF v1.2.1 passes the agent container three names: `HOME`, `ANTHROPIC_API_KEY` and `ANTHROPIC_BASE_URL` (`src/Core/Sandbox.cs`). A throwaway branch adds eleven: nine telemetry names, `NO_PROXY` and `no_proxy`.
 
-With that branch, the cost metric lands in Grafana keyed by `session_id`, one series per factory phase. The metric is a floor. The headless process exits without a final flush, so a phase loses up to one 10 s export interval and its last turn. One run matched the factory's log to four places; the other read low on every phase.
+With that branch, the cost metric lands in Grafana keyed by `session_id`, one series per factory phase. The metric is a floor. The headless process exits without a final flush, so a phase loses up to one 10 s export interval and its last turn. One run matched the factory's log to four places; the other read low on every phase. A LogQL sum of cost_usd over a session's api_request events matches the factory log to four decimals for all six sessions.
 
 The log events are exact. Loki holds one `api_request` event per API request, keyed by `session_id`, with model, tokens, `cost_usd` and latency. The sum of `cost_usd` over a session's events is the exact cost. The gateway ledger on llm-01 holds every call with its cost too, but its `run_id` column is empty ([`../run-history/finding.md`](../run-history/finding.md)).
 

@@ -105,6 +105,25 @@ The Loki data source `grafanacloud-ambercroissant1151-logs` holds one event per 
 
 The sum of `cost_usd` over a session's events is the exact figure. This is the per-call record keyed by session that the gateway ledger lacks (its `run_id` column is empty).
 
+### The event sum per session
+
+Explore on the Loki data source, Instant type, Last 1 hour, run at 01:20 UTC:
+
+```
+sum by (session_id) (sum_over_time({service_name="agent-platform-eval-platform"} | event_name="api_request" | unwrap cost_usd [1h]))
+```
+
+| session_id | Factory log | Metric | Event sum |
+|---|---|---|---|
+| 1a9c399a-d601-49eb-8438-abc4ea34c12d | 0.0856194 | 0.0856 | 0.0856 |
+| a8446dc5-5272-4190-a7bc-29e5dc1a9351 | 0.073822 | 0.0738 | 0.0738 |
+| 20c0dd34-c989-4625-99f4-d28086743565 | 0.0445089 | 0.0445 | 0.0445 |
+| c3067912-fbeb-4ff5-bb66-1a324eed3268 | 0.0379027 | 0.0116 | 0.0379 |
+| 32dd0104-df87-442d-8722-8f4b199fbdc7 | 0.0799911 | 0.0719 | 0.0800 |
+| 26a30f9c-1be4-4e5e-8c39-53ee9c6801aa | 0.0455749 | 0.0387 | 0.0456 |
+
+The event sum matches the factory log for every session, including the three the metric floored, so the events are the exact per-session record and the metric is the live view.
+
 ## The gateway ledger
 
-The gateway ledger on llm-01 already attributes spend per call. The cloud-logging probe read it for the platform delivery of issue #2 on 2026-10-24. Its 26 calls and the sum of $0.5289, every row `success`, are in [`../cloud-logging/capture-platform.md`](../cloud-logging/capture-platform.md). The ledger keys each row by the gateway consumer and the model. It has no parent, agent or `run_id` column, so one factory job is read by its time window and consumer, not by a session id ([`../run-history/capture-platform.md`](../run-history/capture-platform.md)).
+The gateway ledger on llm-01 already attributes spend per call. The cloud-logging probe read it for the platform delivery of issue #2 on 2026-10-24. Its 26 calls and the sum of $0.5289, every row `success`, are in [`../cloud-logging/capture-platform.md`](../cloud-logging/capture-platform.md). The ledger keys each row by the gateway consumer and the model. It has no parent or agent column. It has a `run_id` column that is empty, which matches [`../run-history/finding.md`](../run-history/finding.md). So one factory job is read by its time window and consumer, not by a session id ([`../run-history/capture-platform.md`](../run-history/capture-platform.md)).
