@@ -59,6 +59,10 @@ a.cell { color: inherit; text-decoration: none; }
 a.cell:hover, a.cell:focus { text-decoration: underline; }
 .wrap { overflow-x: auto; }
 ul.ladder { padding-left: 1.4rem; }
+sup a { text-decoration: none; padding: 0 .1em; }
+ol.footnotes { padding-left: 1.6rem; font-size: .95rem; }
+ol.footnotes li { margin: .4rem 0; }
+ol.footnotes li:target { background: var(--head); }
 footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule); color: var(--muted); font-size: .92rem; }
 @media (max-width: 720px) {
   table.cells thead { display: none; }
@@ -91,6 +95,7 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
   <h2>How to read it</h2>
   <p>Cloud Sessions is a VM that Anthropic manages. The platform is the factory at <code>v1.1.0</code> in Docker, on a self-hosted runner in a lab VM. Both arms ran the same agent on the same model, <code>claude-sonnet-5-5</code>. They ran against one target repo, <a href="https://github.com/sbiondolillo/platform-eval-sample">sbiondolillo/platform-eval-sample</a>. <a href="https://github.com/sbiondolillo/platform-eval-sample/issues/1">Issue #1</a> is the delivery, and <a href="https://github.com/sbiondolillo/platform-eval-sample/issues/2">issue #2</a> is the probes.</p>
   <p>A probe run in the real product proves every Cloud cell. A public asset proves every platform cell. Each cell links its proof.</p>
+  <p>The platform arm is a homelab: one runner host, a Squid proxy, a self-hosted vault and a self-hosted gateway. It stands in for an enterprise platform and is not one. The product fixes the Cloud cells. The platform cells are a floor. Where an enterprise component would change a row, the platform cell carries a footnote. The footnote says what changes.</p>
 </section>
 
 <section>
@@ -98,6 +103,23 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
   <div class="wrap">
   __TABLE__
   </div>
+  <h3>Footnotes: what an enterprise component changes</h3>
+  <p>Rows without a footnote are set by GitHub or by the factory's own design, not by a lab stand-in.</p>
+  __FOOTNOTES__
+  <template id="footnotes">
+    <li data-row="substrate">The lab runs the container on one shared runner VM, with Docker's default capabilities. A platform with one VM per job, or with a sandboxed runtime, gives each job its own boundary.</li>
+    <li data-row="model-credential">The lab gateway issues one static consumer key, with no budget and no model list. A gateway that issues a per-job key with a budget and a model list ends the key's reach with the job.</li>
+    <li data-row="forge-credential">The lab uses the operator's fine-grained PAT, and the factory process reads it from the vault. A GitHub App, or a vault that issues a short-lived installation token per job, lets the factory open the pull request under a bot identity.</li>
+    <li data-row="vault-secret">The lab's <code>infisical run</code> step puts the secret in the job's environment, and Squid tunnels TLS by host only. A vault agent or a TLS-terminating proxy attaches the secret per request and binds it to a host. Then the factory process never holds the value, as in the Cloud cell.</li>
+    <li data-row="egress">Squid tunnels by host, and the operator edits the allowlist by hand. A TLS-terminating proxy inspects the path and the method, and a managed allowlist replaces the hand edit. The host-only rule stays the floor.</li>
+    <li data-row="tool-model-policy">The factory's code holds the model pin, and the gateway key has no model list. A model list on the key moves the pin into the gateway, where the agent cannot change it. Squid still stops a new remote server by host only.</li>
+    <li data-row="run-history">The transcripts stay on the runner host until the next run, and the ledger is a lab ClickHouse table. An artifact store, or the store step of the <code>v1.2.1</code> starter, keeps the transcripts past the next run. An enterprise gateway's own ledger replaces the lab table.</li>
+    <li data-row="spend-attribution">The lab's cost metric needs a nine-name pass-through in the factory. A per-job key attributes spend on the gateway ledger with no pass-through. The OpenTelemetry route stays as a second readout.</li>
+    <li data-row="audit-record">The agent can edit its own transcript on the runner host. A transcript upload at job end, or a log sink that the agent cannot reach, adds a record that the agent cannot edit. The job log and the ledger are the floor.</li>
+    <li data-row="subagent-record">The subagent's transcript stays on the runner host until the next job. The store step or the artifact store from the run-history row keeps it too. A per-job key separates its calls from the parent's calls on the ledger.</li>
+    <li data-row="toolchain">The lab builds the image on the runner host, and the image never expires. An image registry with a rebuild schedule gives the platform the rebuild that Cloud Sessions does on its own.</li>
+    <li data-row="setup-cost">The lab already held 9 items and 4 secrets before the experiment. In an enterprise, the platform team does that work. So the factory owner's count is the 28 steps alone.</li>
+  </template>
 </section>
 
 <section>

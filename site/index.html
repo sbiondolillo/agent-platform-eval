@@ -60,6 +60,10 @@ a.cell { color: inherit; text-decoration: none; }
 a.cell:hover, a.cell:focus { text-decoration: underline; }
 .wrap { overflow-x: auto; }
 ul.ladder { padding-left: 1.4rem; }
+sup a { text-decoration: none; padding: 0 .1em; }
+ol.footnotes { padding-left: 1.6rem; font-size: .95rem; }
+ol.footnotes li { margin: .4rem 0; }
+ol.footnotes li:target { background: var(--head); }
 footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule); color: var(--muted); font-size: .92rem; }
 @media (max-width: 720px) {
   table.cells thead { display: none; }
@@ -92,6 +96,7 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
   <h2>How to read it</h2>
   <p>Cloud Sessions is a VM that Anthropic manages. The platform is the factory at <code>v1.1.0</code> in Docker, on a self-hosted runner in a lab VM. Both arms ran the same agent on the same model, <code>claude-sonnet-5-5</code>. They ran against one target repo, <a href="https://github.com/sbiondolillo/platform-eval-sample">sbiondolillo/platform-eval-sample</a>. <a href="https://github.com/sbiondolillo/platform-eval-sample/issues/1">Issue #1</a> is the delivery, and <a href="https://github.com/sbiondolillo/platform-eval-sample/issues/2">issue #2</a> is the probes.</p>
   <p>A probe run in the real product proves every Cloud cell. A public asset proves every platform cell. Each cell links its proof.</p>
+  <p>The platform arm is a homelab: one runner host, a Squid proxy, a self-hosted vault and a self-hosted gateway. It stands in for an enterprise platform and is not one. The product fixes the Cloud cells. The platform cells are a floor. Where an enterprise component would change a row, the platform cell carries a footnote. The footnote says what changes.</p>
 </section>
 
 <section>
@@ -110,47 +115,47 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
       <tr>
         <th scope="row"><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/substrate/finding.md">substrate</a></th>
         <td data-label="Cloud Sessions"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/substrate/finding.md">the agent runs as root with <code>cap_sys_admin</code> inside its own Firecracker microVM, so the VM boundary is the whole isolation.</a></td>
-        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/substrate/finding.md">the agent runs as an unprivileged uid with Docker's default capabilities in a container that shares the runner VM's kernel, so the container and the VM are two boundaries, and the factory sets none of the container's confinement itself.</a></td>
+        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/substrate/finding.md">the agent runs as an unprivileged uid with Docker's default capabilities in a container that shares the runner VM's kernel, so the container and the VM are two boundaries, and the factory sets none of the container's confinement itself.</a><sup><a href="#fn-1" id="fnref-1">1</a></sup></td>
       </tr>
       <tr>
         <th scope="row"><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/model-credential/finding.md">model-credential</a></th>
         <td data-label="Cloud Sessions"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/model-credential/finding.md">the VM holds the account's OAuth token in a file that the root agent can read, and model calls skip the egress proxy, so the credential that the agent can read has the reach of the whole account.</a></td>
-        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/model-credential/finding.md">the container holds only a lab gateway key, usable from inside the lab and logged per call, and the vendor key never enters the Sandbox VLAN, but the gateway sets no budget or model list on that key.</a></td>
+        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/model-credential/finding.md">the container holds only a lab gateway key, usable from inside the lab and logged per call, and the vendor key never enters the Sandbox VLAN, but the gateway sets no budget or model list on that key.</a><sup><a href="#fn-2" id="fnref-2">2</a></sup></td>
       </tr>
       <tr>
         <th scope="row"><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/forge-credential/finding.md">forge-credential</a></th>
         <td data-label="Cloud Sessions"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/forge-credential/finding.md">the sandbox holds no token on disk, but the managed proxy injects the operator's own account credential with admin on the one granted repo, scoped away from the owner's other repos until <code>add_repo</code> is called.</a></td>
-        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/forge-credential/finding.md">the agent's container holds no forge credential at all; the operator's fine-grained PAT and a job-scoped Actions token both sit in the factory process on the host, and the pull request is opened under the operator account.</a></td>
+        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/forge-credential/finding.md">the agent's container holds no forge credential at all; the operator's fine-grained PAT and a job-scoped Actions token both sit in the factory process on the host, and the pull request is opened under the operator account.</a><sup><a href="#fn-3" id="fnref-3">3</a></sup></td>
       </tr>
       <tr>
         <th scope="row"><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/vault-secret/finding.md">vault-secret</a></th>
         <td data-label="Cloud Sessions"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/vault-secret/finding.md">the managed proxy attaches the secret on the way out and only to its allowed hosts, so the agent's VM never holds a value it can read.</a></td>
-        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/vault-secret/finding.md"><code>infisical run</code> puts the secret in the runner job's environment, so the factory process can read it and must attach it itself, and the agent's container gets it only when the factory passes it by name.</a></td>
+        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/vault-secret/finding.md"><code>infisical run</code> puts the secret in the runner job's environment, so the factory process can read it and must attach it itself, and the agent's container gets it only when the factory passes it by name.</a><sup><a href="#fn-4" id="fnref-4">4</a></sup></td>
       </tr>
       <tr>
         <th scope="row"><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/egress/finding.md">egress</a></th>
         <td data-label="Cloud Sessions"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/egress/finding.md">a local relay tunnels HTTPS only to exact allowed hostnames on port 443, and the gateway intercepts every direct port 443 connection and answers it itself, so no request reaches the internet except through the relay.</a></td>
-        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/egress/finding.md">Squid tunnels only to the hosts on the runner's per-source allowlist, which the operator edits by hand, and the firewall drops every direct connection, so Squid is the only path out.</a></td>
+        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/egress/finding.md">Squid tunnels only to the hosts on the runner's per-source allowlist, which the operator edits by hand, and the firewall drops every direct connection, so Squid is the only path out.</a><sup><a href="#fn-5" id="fnref-5">5</a></sup></td>
       </tr>
       <tr>
         <th scope="row"><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/tool-model-policy/finding.md">tool-model-policy</a></th>
         <td data-label="Cloud Sessions"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/tool-model-policy/finding.md">the operator picks any of twelve models with no control and the account's connectors set the tools, so the only controls observed were the egress relay, the start-time tool loading and a model-side safeguard that acts on prompt content.</a></td>
-        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/tool-model-policy/finding.md">the factory fixes the model and the tools in code and Squid stops a new remote server, but the agent holds a gateway key with no model list and runs with every tool allowed, so it can call any gateway model on its own.</a></td>
+        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/tool-model-policy/finding.md">the factory fixes the model and the tools in code and Squid stops a new remote server, but the agent holds a gateway key with no model list and runs with every tool allowed, so it can call any gateway model on its own.</a><sup><a href="#fn-6" id="fnref-6">6</a></sup></td>
       </tr>
       <tr>
         <th scope="row"><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/run-history/finding.md">run-history</a></th>
         <td data-label="Cloud Sessions"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/run-history/finding.md">sessions are listed and read only inside the product, in the web UI, the Share link, <code>claude --teleport</code> and the in-session MCP tools, and no documented API or CLI command lists them or exports a transcript to a file.</a></td>
-        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/run-history/finding.md"><code>gh</code> lists the runs and downloads the 90-day job log, the gateway ledger holds every model call, and the model transcripts are files that the v1.2.1 starter pushes to a private store repo, but this target repo's v1.1.0 workflow has no store step, so they stay on the runner host only until the next run.</a></td>
+        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/run-history/finding.md"><code>gh</code> lists the runs and downloads the 90-day job log, the gateway ledger holds every model call, and the model transcripts are files that the v1.2.1 starter pushes to a private store repo, but this target repo's v1.1.0 workflow has no store step, so they stay on the runner host only until the next run.</a><sup><a href="#fn-7" id="fnref-7">7</a></sup></td>
       </tr>
       <tr>
         <th scope="row"><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/spend-attribution/finding.md">spend-attribution</a></th>
         <td data-label="Cloud Sessions"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/spend-attribution/finding.md">the documented environment route exported nothing in four sessions, the Claude Code process held none of the variables, and spend is read only from Anthropic's usage view.</a></td>
-        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/spend-attribution/finding.md">with a nine-name pass-through in the factory, the cost metric and one event per API request land in the operator's Grafana keyed by session id, and the metric reads within one export interval of the factory's own log.</a></td>
+        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/spend-attribution/finding.md">with a nine-name pass-through in the factory, the cost metric and one event per API request land in the operator's Grafana keyed by session id, and the metric reads within one export interval of the factory's own log.</a><sup><a href="#fn-8" id="fnref-8">8</a></sup></td>
       </tr>
       <tr>
         <th scope="row"><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/audit-record/finding.md">audit-record</a></th>
         <td data-label="Cloud Sessions"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/audit-record/finding.md">the in-VM transcript is root-writable and only the auto-mode classifier stopped an append and a delete, so the record a compromised agent cannot erase is the server-side transcript outside the VM.</a></td>
-        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/audit-record/finding.md">the agent can edit or delete its own transcript on the runner with no control, so the records it cannot erase are the host-written job log, pull request history and the gateway's per-call ledger.</a></td>
+        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/audit-record/finding.md">the agent can edit or delete its own transcript on the runner with no control, so the records it cannot erase are the host-written job log, pull request history and the gateway's per-call ledger.</a><sup><a href="#fn-9" id="fnref-9">9</a></sup></td>
       </tr>
       <tr>
         <th scope="row"><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/github-start/finding.md">github-start</a></th>
@@ -165,12 +170,12 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
       <tr>
         <th scope="row"><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/subagent-record/finding.md">subagent-record</a></th>
         <td data-label="Cloud Sessions"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/subagent-record/finding.md">the subagent keeps its own transcript in the VM's session folder, and the server-side transcript keeps its report and a row with its model, but whether the subagent's own transcript outlives the container is pending the reclaim step.</a></td>
-        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/subagent-record/finding.md">the subagent's transcript lands beside the parent's on the runner host until the next job, it is never uploaded without the v1.2.1 store step, and the gateway ledger counts its calls under <code>dsf</code> with no link to the parent.</a></td>
+        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/subagent-record/finding.md">the subagent's transcript lands beside the parent's on the runner host until the next job, it is never uploaded without the v1.2.1 store step, and the gateway ledger counts its calls under <code>dsf</code> with no link to the parent.</a><sup><a href="#fn-10" id="fnref-10">10</a></sup></td>
       </tr>
       <tr>
         <th scope="row"><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/toolchain/finding.md">toolchain</a></th>
         <td data-label="Cloud Sessions"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/toolchain/finding.md">a setup script in the environment installs the SDK once, and later sessions start from a filesystem snapshot that the docs say is rebuilt on a script or allowlist change and after about seven days, but the UI shows no setup duration.</a></td>
-        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/toolchain/finding.md">the factory builds a 2.11 GB image from its own Dockerfile on the runner host at first use in about 66 s, each job then pays about 16 s of toolchain setup, and the image never expires and changes only when someone deletes it.</a></td>
+        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/toolchain/finding.md">the factory builds a 2.11 GB image from its own Dockerfile on the runner host at first use in about 66 s, each job then pays about 16 s of toolchain setup, and the image never expires and changes only when someone deletes it.</a><sup><a href="#fn-11" id="fnref-11">11</a></sup></td>
       </tr>
       <tr>
         <th scope="row"><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/branch-protection/finding.md">branch-protection</a></th>
@@ -180,11 +185,27 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
       <tr>
         <th scope="row"><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/setup-cost/finding.md">setup-cost</a></th>
         <td data-label="Cloud Sessions"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/setup-cost/finding.md">Cloud Sessions took 25 operator steps and 4 secrets, all in web forms, GitHub and the workstation, with 8 steps and no secret to reach the first pull request and no lab host touched.</a></td>
-        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/setup-cost/finding.md">the platform took 28 operator steps and no new secret in the experiment, on top of 9 lab items and 4 secrets that the lab already held, and it touched 3 lab hosts in the experiment and 6 with its prerequisites.</a></td>
+        <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/setup-cost/finding.md">the platform took 28 operator steps and no new secret in the experiment, on top of 9 lab items and 4 secrets that the lab already held, and it touched 3 lab hosts in the experiment and 6 with its prerequisites.</a><sup><a href="#fn-12" id="fnref-12">12</a></sup></td>
       </tr>
     </tbody>
   </table>
   </div>
+  <h3>Footnotes: what an enterprise component changes</h3>
+  <p>Rows without a footnote are set by GitHub or by the factory's own design, not by a lab stand-in.</p>
+  <ol class="footnotes">
+    <li id="fn-1"><strong>substrate.</strong> The lab runs the container on one shared runner VM, with Docker's default capabilities. A platform with one VM per job, or with a sandboxed runtime, gives each job its own boundary. <a href="#fnref-1" aria-label="Back to the substrate row">back</a></li>
+    <li id="fn-2"><strong>model-credential.</strong> The lab gateway issues one static consumer key, with no budget and no model list. A gateway that issues a per-job key with a budget and a model list ends the key's reach with the job. <a href="#fnref-2" aria-label="Back to the model-credential row">back</a></li>
+    <li id="fn-3"><strong>forge-credential.</strong> The lab uses the operator's fine-grained PAT, and the factory process reads it from the vault. A GitHub App, or a vault that issues a short-lived installation token per job, lets the factory open the pull request under a bot identity. <a href="#fnref-3" aria-label="Back to the forge-credential row">back</a></li>
+    <li id="fn-4"><strong>vault-secret.</strong> The lab's <code>infisical run</code> step puts the secret in the job's environment, and Squid tunnels TLS by host only. A vault agent or a TLS-terminating proxy attaches the secret per request and binds it to a host. Then the factory process never holds the value, as in the Cloud cell. <a href="#fnref-4" aria-label="Back to the vault-secret row">back</a></li>
+    <li id="fn-5"><strong>egress.</strong> Squid tunnels by host, and the operator edits the allowlist by hand. A TLS-terminating proxy inspects the path and the method, and a managed allowlist replaces the hand edit. The host-only rule stays the floor. <a href="#fnref-5" aria-label="Back to the egress row">back</a></li>
+    <li id="fn-6"><strong>tool-model-policy.</strong> The factory's code holds the model pin, and the gateway key has no model list. A model list on the key moves the pin into the gateway, where the agent cannot change it. Squid still stops a new remote server by host only. <a href="#fnref-6" aria-label="Back to the tool-model-policy row">back</a></li>
+    <li id="fn-7"><strong>run-history.</strong> The transcripts stay on the runner host until the next run, and the ledger is a lab ClickHouse table. An artifact store, or the store step of the <code>v1.2.1</code> starter, keeps the transcripts past the next run. An enterprise gateway's own ledger replaces the lab table. <a href="#fnref-7" aria-label="Back to the run-history row">back</a></li>
+    <li id="fn-8"><strong>spend-attribution.</strong> The lab's cost metric needs a nine-name pass-through in the factory. A per-job key attributes spend on the gateway ledger with no pass-through. The OpenTelemetry route stays as a second readout. <a href="#fnref-8" aria-label="Back to the spend-attribution row">back</a></li>
+    <li id="fn-9"><strong>audit-record.</strong> The agent can edit its own transcript on the runner host. A transcript upload at job end, or a log sink that the agent cannot reach, adds a record that the agent cannot edit. The job log and the ledger are the floor. <a href="#fnref-9" aria-label="Back to the audit-record row">back</a></li>
+    <li id="fn-10"><strong>subagent-record.</strong> The subagent's transcript stays on the runner host until the next job. The store step or the artifact store from the run-history row keeps it too. A per-job key separates its calls from the parent's calls on the ledger. <a href="#fnref-10" aria-label="Back to the subagent-record row">back</a></li>
+    <li id="fn-11"><strong>toolchain.</strong> The lab builds the image on the runner host, and the image never expires. An image registry with a rebuild schedule gives the platform the rebuild that Cloud Sessions does on its own. <a href="#fnref-11" aria-label="Back to the toolchain row">back</a></li>
+    <li id="fn-12"><strong>setup-cost.</strong> The lab already held 9 items and 4 secrets before the experiment. In an enterprise, the platform team does that work. So the factory owner's count is the 28 steps alone. <a href="#fnref-12" aria-label="Back to the setup-cost row">back</a></li>
+  </ol>
 </section>
 
 <section>
