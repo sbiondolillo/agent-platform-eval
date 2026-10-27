@@ -47,14 +47,15 @@ def cells(row):
         fail("%s: '## Report cells' is not the last section" % row)
     cloud = [l[len("Cloud: "):] for l in lines if l.startswith("Cloud: ")]
     plat = [l[len("Platform: "):] for l in lines if l.startswith("Platform: ")]
-    if len(cloud) != 1 or len(plat) != 1 or len(lines) != 2:
-        fail("%s: expected one Cloud line and one Platform line, found %d lines" % (row, len(lines)))
-    for c in (cloud[0], plat[0]):
+    ma = [l[len("Managed Agents: "):] for l in lines if l.startswith("Managed Agents: ")]
+    if len(cloud) != 1 or len(plat) != 1 or len(ma) != 1 or len(lines) != 3:
+        fail("%s: expected one Cloud line, one Platform line and one Managed Agents line, found %d lines" % (row, len(lines)))
+    for c in (cloud[0], plat[0], ma[0]):
         if "](" in c:
             fail("%s: a cell holds a Markdown link; the whole cell is already a link" % row)
         if c.count("`") % 2:
             fail("%s: unbalanced backtick in a cell" % row)
-    return cloud[0], plat[0]
+    return cloud[0], plat[0], ma[0]
 
 
 def inline(text):
@@ -94,7 +95,7 @@ for row in rows:
 
 body = []
 for row in rows:
-    cloud, plat = cells(row)
+    cloud, plat, ma = cells(row)
     href = blob % row
     mark = ""
     if row in number:
@@ -104,31 +105,32 @@ for row in rows:
         '        <th scope="row"><a href="%s">%s</a></th>\n'
         '        <td data-label="Cloud Sessions"><a class="cell" href="%s">%s</a></td>\n'
         '        <td data-label="Platform"><a class="cell" href="%s">%s</a>%s</td>\n'
-        '      </tr>' % (href, row, href, inline(cloud), href, inline(plat), mark)
+        '        <td data-label="Managed Agents"><a class="cell" href="%s">%s</a></td>\n'
+        '      </tr>' % (href, row, href, inline(cloud), href, inline(plat), mark, href, inline(ma))
     )
 
 table = (
     '<table class="cells">\n'
     '    <thead>\n'
-    '      <tr><th scope="col">row</th><th scope="col">Cloud Sessions</th><th scope="col">Platform</th></tr>\n'
+    '      <tr><th scope="col">row</th><th scope="col">Cloud Sessions</th><th scope="col">Platform</th><th scope="col">Managed Agents</th></tr>\n'
     '    </thead>\n'
     '    <tbody>\n' + "\n".join(body) + '\n'
     '    </tbody>\n'
     '  </table>'
 )
 
-# Check the rendered table: 16 rows, and each of the 32 cells links its own finding.
+# Check the rendered table: 16 rows, and each of the 48 cells links its own finding.
 trs = re.findall(r"<tr>\s*<th scope=\"row\">.*?</tr>", table, re.S)
 if len(trs) != 16:
     fail("expected 16 table rows, rendered %d" % len(trs))
 proof = 0
 for row, tr in zip(rows, trs):
     links = re.findall(r'<td data-label="[^"]+"><a class="cell" href="([^"]+)">', tr)
-    if links != [blob % row] * 2:
-        fail("%s: the two cells do not both link the finding" % row)
+    if links != [blob % row] * 3:
+        fail("%s: the three cells do not all link the finding" % row)
     proof += len(links)
-if proof != 32:
-    fail("expected 32 proof links, found %d" % proof)
+if proof != 48:
+    fail("expected 48 proof links, found %d" % proof)
 
 refs = re.findall(r'<td data-label="Platform">[^\n]*<sup><a href="#fn-(\d+)" id="fnref-(\d+)">(\d+)</a></sup></td>', table)
 if len(refs) != len(notes) or any(a != b or b != c for a, b, c in refs):

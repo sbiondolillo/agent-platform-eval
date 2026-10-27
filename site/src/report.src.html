@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Agent platform eval</title>
-<meta name="description" content="A controls comparison of Claude Code Cloud Sessions and a hosted agent platform, run to settle the direction of dotnet-software-factory v2.">
+<meta name="description" content="A controls comparison of Claude Code Cloud Sessions, Claude Managed Agents and a hosted agent platform, run to settle the direction of dotnet-software-factory v2.">
 <style>
 :root {
   --bg: #ffffff;
@@ -54,7 +54,8 @@ table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
 th, td { text-align: left; vertical-align: top; padding: .6rem .7rem; border-bottom: 1px solid var(--rule); }
 thead th { background: var(--head); font-size: .9rem; }
 tbody th { font-weight: 600; white-space: nowrap; }
-table.cells td { width: 42%; }
+table.cells td { width: 28%; }
+h4 { font-size: 1rem; margin: 1.25rem 0 .4rem; }
 a.cell { color: inherit; text-decoration: none; }
 a.cell:hover, a.cell:focus { text-decoration: underline; }
 .wrap { overflow-x: auto; }
@@ -87,7 +88,7 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
 
 <header>
   <h1>Agent platform eval</h1>
-  <p class="lede">This report is a controls comparison of two ways to run Claude Code on an issue. The experiment ran to settle the direction of dotnet-software-factory v2.</p>
+  <p class="lede">This report is a controls comparison of three ways to run Claude Code on an issue. The experiment ran to settle the direction of dotnet-software-factory v2.</p>
   <p class="meta">Source: <a href="https://github.com/sbiondolillo/agent-platform-eval">the repo</a>. Design and status: <a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/docs/plan.md">the plan</a>.</p>
 </header>
 
@@ -96,6 +97,7 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
   <p>Cloud Sessions is a VM that Anthropic manages. The platform is the factory at <code>v1.1.0</code> in Docker, on a self-hosted runner in a lab VM. Both arms ran the same agent on the same model, <code>claude-sonnet-5-5</code>. They ran against one target repo, <a href="https://github.com/sbiondolillo/platform-eval-sample">sbiondolillo/platform-eval-sample</a>. <a href="https://github.com/sbiondolillo/platform-eval-sample/issues/1">Issue #1</a> is the delivery, and <a href="https://github.com/sbiondolillo/platform-eval-sample/issues/2">issue #2</a> is the probes.</p>
   <p>A probe run in the real product proves every Cloud cell. A public asset proves every platform cell. Each cell links its proof.</p>
   <p>The platform arm is a homelab: one runner host, a Squid proxy, a self-hosted vault and a self-hosted gateway. It stands in for an enterprise platform and is not one. The product fixes the Cloud cells. The platform cells are a floor. Where an enterprise component would change a row, the platform cell carries a footnote. The footnote says what changes.</p>
+  <p>The third arm, Managed Agents, was added on 2026-10-27. The <a href="https://platform.claude.com/docs/en/managed-agents/overview">Managed Agents docs</a> prove its cells. Where the docs are silent, one session proves the cell. Managed Agents is the vendor's product. So, like the Cloud cells, the product fixes its cells.</p>
 </section>
 
 <section>
@@ -124,19 +126,19 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
 
 <section>
   <h2>The delivery</h2>
-  <p>Each arm delivered one pull request on issue #1. The scored values are from the final attempt of each arm.</p>
+  <p>Cloud Sessions and the platform each delivered one pull request on issue #1. The scored values are from the final attempt of each arm. Managed Agents reviewed one pull request of <a href="https://github.com/sbiondolillo/dotnet-software-factory">sbiondolillo/dotnet-software-factory</a>, because the judges exist only there.</p>
   <div class="wrap">
   <table>
     <thead>
-      <tr><th scope="col">value</th><th scope="col">Cloud Sessions</th><th scope="col">Platform</th></tr>
+      <tr><th scope="col">value</th><th scope="col">Cloud Sessions</th><th scope="col">Platform</th><th scope="col">Managed Agents</th></tr>
     </thead>
     <tbody>
-      <tr><th scope="row">pull request</th><td><a href="https://github.com/sbiondolillo/platform-eval-sample/pull/5">PR 5</a></td><td><a href="https://github.com/sbiondolillo/platform-eval-sample/pull/6">PR 6</a>, from attempt 2</td></tr>
-      <tr><th scope="row">gates</th><td>The build suite passed 14 of 14. PR 5 passed <code>build</code> and <code>integration</code> in CI.</td><td>Attempt 2 passed every gate. PR 6 passed <code>build</code> and <code>integration</code> in CI.</td></tr>
-      <tr><th scope="row">review verdict</th><td><code>APPROVED</code></td><td>Approved after one redo</td></tr>
-      <tr><th scope="row">wall time</th><td>About 7 min for the build</td><td>6 min 45 s</td></tr>
-      <tr><th scope="row">spend</th><td>Not exposed per session</td><td>$0.6514 on the gateway ledger</td></tr>
-      <tr><th scope="row">proof</th><td><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/cloud-delivery/finding.md">cloud-delivery</a></td><td><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/platform-delivery/finding.md">platform-delivery</a></td></tr>
+      <tr><th scope="row">pull request</th><td><a href="https://github.com/sbiondolillo/platform-eval-sample/pull/5">PR 5</a></td><td><a href="https://github.com/sbiondolillo/platform-eval-sample/pull/6">PR 6</a>, from attempt 2</td><td><a href="https://github.com/sbiondolillo/dotnet-software-factory/pull/351">PR 351</a> of <code>dotnet-software-factory</code>, reviewed in run <a href="https://github.com/sbiondolillo/dotnet-software-factory/actions/runs/40532377644">40532377644</a></td></tr>
+      <tr><th scope="row">gates</th><td>The build suite passed 14 of 14. PR 5 passed <code>build</code> and <code>integration</code> in CI.</td><td>Attempt 2 passed every gate. PR 6 passed <code>build</code> and <code>integration</code> in CI.</td><td>The sessions did not build. PR 351 passed <code>build</code> and <code>integration</code> in CI.</td></tr>
+      <tr><th scope="row">review verdict</th><td><code>APPROVED</code></td><td>Approved after one redo</td><td>Both angles accepted, so <code>APPROVED</code></td></tr>
+      <tr><th scope="row">wall time</th><td>About 7 min for the build</td><td>6 min 45 s</td><td>2 min 35 s for the review</td></tr>
+      <tr><th scope="row">spend</th><td>Not exposed per session</td><td>$0.6514 on the gateway ledger</td><td>24 cents in <code>usage.list_cost</code></td></tr>
+      <tr><th scope="row">proof</th><td><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/cloud-delivery/finding.md">cloud-delivery</a></td><td><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/platform-delivery/finding.md">platform-delivery</a></td><td><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/platform-delivery/finding.md">platform-delivery</a></td></tr>
     </tbody>
   </table>
   </div>
@@ -180,6 +182,31 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
   </ul>
 
   <p><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/setup-cost/finding.md">setup-cost</a>: Cloud Sessions took 25 operator steps and 4 secrets. The platform took 28 steps and no new secret, on top of 9 lab items and 4 secrets that the lab already held.</p>
+
+  <h3>What the third arm changes</h3>
+  <p>Managed Agents fills the same rows. It moves some rows into the product and leaves others with the owner.</p>
+  <h4>Rows Managed Agents covers today</h4>
+  <ul>
+    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/cloud-logging/finding.md">cloud-logging</a>: the stderr of a failed command is in the session's events, read by API.</li>
+    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/substrate/finding.md">substrate</a>: the agent runs as root in a Docker container inside a Firecracker microVM.</li>
+    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/model-credential/finding.md">model-credential</a>: the sandbox holds no model key, because the service makes the call. A commit-signing token is present, and its reach is not probed.</li>
+    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/forge-credential/finding.md">forge-credential</a>: a credential helper injects the caller's token per request. So a read-only token gives fetch and a 403 on push.</li>
+    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/egress/finding.md">egress</a>: an unlisted hostname does not resolve. But <code>api.anthropic.com</code> answers from any sandbox.</li>
+    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/run-history/finding.md">run-history</a>: the list and events endpoints export every session and its whole transcript.</li>
+    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/spend-attribution/finding.md">spend-attribution</a>: the API gives each session's <code>list_cost</code> with its metadata. A Console telemetry destination landed a session trace in Grafana Cloud.</li>
+    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/audit-record/finding.md">audit-record</a>: the events live outside the sandbox, read by a key the sandbox does not hold. The safeguard refused the in-sandbox route.</li>
+    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/crash-resume/finding.md">crash-resume</a>: an idle sandbox is checkpointed. A later message resumes it with the files kept and the processes gone.</li>
+    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/github-start/finding.md">github-start</a>: a workflow job starts a session with a workspace API key. The product has no idempotency key.</li>
+    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/subagent-record/finding.md">subagent-record</a>: there is no subagent. Each reviewer is its own session with its own record.</li>
+  </ul>
+  <h4>Rows the owner must build on Managed Agents</h4>
+  <ul>
+    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/tool-model-policy/finding.md">tool-model-policy</a>: the agent's model pin is a default that any create body overrides. So the control is whoever holds the API key.</li>
+    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/branch-protection/finding.md">branch-protection</a>: require the <code>judge</code> check run. The session's token cannot push.</li>
+    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/vault-secret/finding.md">vault-secret</a>: the docs are the only proof. The model-side safeguard refused the one-request test twice.</li>
+    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/toolchain/finding.md">toolchain</a>: the apt SDK is <code>10.0.113</code>, and the target's band is <code>10.0.4xx</code>. So the mutation angle stays on the runner.</li>
+  </ul>
+  <p><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/setup-cost/finding.md">setup-cost</a>: Managed Agents took 6 operator steps and 2 new secrets. Cloud Sessions took 25 steps and 4 secrets. The platform took 28 steps and no new secret, on 9 lab items.</p>
 </section>
 
 <section>
@@ -203,10 +230,14 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
   <p>The agent itself pushed the branch and opened PR 5. It did this through the managed proxy, with the operator's admin credential. In the branch-protection probe, it pushed to protected <code>main</code>. Deliver is the agent, not code.</p>
   <p>Rung 1 needs a deliver step outside the session and a non-admin identity. The glue job from the github-start row is the place to build it.</p>
   <p class="meta">Proof: <a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/forge-credential/finding.md">forge-credential</a>, <a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/branch-protection/finding.md">branch-protection</a>, <a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/github-start/finding.md">github-start</a>.</p>
+
+  <h3>Managed Agents: rung 1, both lines held by the product</h3>
+  <p>A Claude Code session built the subject. Two Managed Agents sessions reviewed it, with a person at the merge. Deliver is code. The workflow job posts the review and the check run with its own scoped token. The agent never holds the credential that opens or merges a pull request. The session's token is read-only, and the product's helper injects it.</p>
+  <p class="meta">Proof: <a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/forge-credential/finding.md">forge-credential</a>, <a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/branch-protection/finding.md">branch-protection</a>, <a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/platform-delivery/finding.md">platform-delivery</a>.</p>
 </section>
 
 <footer>
-  <p>2026-10-25. Every cell links its proof. A cell with no public proof says so.</p>
+  <p>2026-10-27. The Managed Agents column was added that day. Every cell links its proof. A cell with no public proof says so.</p>
 </footer>
 
 </main>
