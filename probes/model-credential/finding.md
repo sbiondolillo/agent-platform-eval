@@ -28,8 +28,22 @@ Capture: [`capture-platform.md`](capture-platform.md).
 | where the vendor key lives | not visible. The VM holds an account OAuth token, not a vendor API key. | in the `litellm` Infisical project, read by the gateway on `llm-01`. Never on sandbox-01. |
 | does the model path go through the egress proxy | no. `api.anthropic.com` is on `NO_PROXY`, so model calls skip the local proxy at `127.0.0.1:33511`. | no. `10.99.0.186` is on `NO_PROXY`, and the call goes direct to the gateway through one firewall permit. The vendor host is denied by Squid. |
 
+## Managed Agents
+
+Probed 2026-10-27 by name only, in the substrate session `sesn_01BdfqEvYjyeHEFzS61c1VgR` ([`../substrate/capture-ma.md`](../substrate/capture-ma.md)). Docs: https://platform.claude.com/docs/en/managed-agents/overview. The environment holds no `ANTHROPIC_API_KEY` and no `ANTHROPIC_BASE_URL`, and the harness is not Claude Code, so the model call is made by the service outside the sandbox, as the docs state. The environment does hold `ANTHROPIC_COMMIT_TOKEN`, 61 characters, prefix `ANTH`, with `ANTHROPIC_COMMIT_SIGN_URL` at `api.anthropic.com`: it is the credential of the commit signer in `/root/.gitconfig`, not a model key. A sweep of the filesystem for the key shape and a test of the commit token's reach were in the audit-record session, which the safeguard refused. The reach of that token is therefore not probed.
+
+| row | Managed Agents |
+|---|---|
+| credential in the sandbox (shape) | no model key. `ANTHROPIC_COMMIT_TOKEN`, 61 characters, for commit signing. |
+| who can read it inside | the agent, as root |
+| blast radius if exfiltrated | not probed: the test was refused |
+| where the vendor key lives | with the service. The caller's API key starts the session and never enters it. |
+| does the model path go through the egress proxy | no. The sandbox makes no model call. |
+
 ## Report cells
 
 Cloud: the VM holds the account's OAuth token in a file that the root agent can read, and model calls skip the egress proxy, so the credential that the agent can read has the reach of the whole account.
 
 Platform: the container holds only a lab gateway key, usable from inside the lab and logged per call, and the vendor key never enters the Sandbox VLAN, but the gateway sets no budget or model list on that key.
+
+Managed Agents: the sandbox holds no model key, because the service makes the model call, but it holds a 61-character commit-signing token whose reach was not probed.

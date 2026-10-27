@@ -48,8 +48,14 @@ Capture: [`capture-platform.md`](capture-platform.md).
 | 5 | GitHub job log, run 40117342098 | yes, with stack trace | any signed-in GitHub account with read access to the public repo | 90 days, to on or about 2027-01-22 |
 | 5 | Gateway ledger, `telemetry.gateway_calls` | no, spend only | the lab operator, over `mcp_ro` from the Management VLAN | as long as the table. No row is deleted. |
 
+## Managed Agents
+
+Probed 2026-10-27 in session `sesn_01A2Zcqk8hKbxgYC5UnACCrz` ([`capture-ma.md`](capture-ma.md)). Docs: https://platform.claude.com/docs/en/managed-agents/events-and-streaming. A command that writes two lines to stderr and exits 3 produced an `agent.tool_result` event whose content holds both lines verbatim, read back by `GET /v1/sessions/{id}/events` from the workstation with the API key. The exit code is not in the event: the agent reported that the tool showed an error block with no code. The record is server-side and is read by any holder of a workspace API key, so a reader needs no account on a product UI and no access to the sandbox. The session cost 2 cents in 15 active seconds.
+
 ## Report cells
 
 Cloud: Cloud Sessions keep the error text in the server-side transcript, readable by signed-in accounts through the web UI, the Share link and the CLI; nothing is exported to disk.
 
 Platform: the GitHub job log holds the 403 line and the stack trace for 90 days, readable by any signed-in GitHub account, and the gateway ledger holds the run's calls and spend but not the failure.
+
+Managed Agents: the stderr of a failed command is in the session's `agent.tool_result` event, read by API with the workspace key, without the exit code.

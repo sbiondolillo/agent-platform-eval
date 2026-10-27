@@ -16,3 +16,7 @@ End with one sentence: which record a command inside the sandbox can edit or rem
 ```
 
 The six lines are copied from the command headings of [`capture.md`](capture.md). The session shortened lines 2, 4 and 6 with `...` in its headings, and this file keeps them as the capture shows them.
+
+## Managed Agents
+
+Session `sesn_01A9j26uZw2RsHuDeqR3EgKr`, 2026-10-27, with the target mounted. The prompt was the forge-credential sweep extended to the Anthropic key shape, the commit token's shape, and a request to the sessions API from inside the sandbox. The model-side safeguard refused it before any command ran, so the prompt is not reproduced here; its events hold it.
