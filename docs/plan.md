@@ -111,8 +111,8 @@ The reviewer is step 3 of the `change` skill: the three angles of `.claude/skill
 
 #### Report and teardown
 
-- [ ] The table gains a third column, with every cell linked to its proof, and the conditional gains the rows the arm changes. Proof: `site/src/build.sh` passes with 48 proof links.
-- [ ] One rung for the arm, with its proof rows.
+- [x] The table gains a third column, with every cell linked to its proof, and the conditional gains the rows the arm changes. Proof: `site/src/build.sh` passes with 48 proof links. Ticked 2026-10-27: commit `f2db5e3`, 16 rows, 48 proof links, 12 footnotes; Pages run 40536500179 succeeded, and the live page carries 16 `Managed Agents` cells.
+- [x] One rung for the arm, with its proof rows. Ticked 2026-10-27: rung 1, both lines held by the product, with forge-credential, branch-protection and platform-delivery as proof, in the same commit.
 - [ ] The API key is deleted in the Console, the read-only token is revoked, both files are removed from the workstation, the two secrets and two variables are removed from the target, the Grafana Cloud telemetry destination is removed from the Console, the vault `vlt_011CgSweaXP6wbjoudWr23MV` and the three environments are archived, and the issue #327 worktree is removed once pull request 351 merges. The workflow is merged to `main`, because `workflow_dispatch` runs only from the default branch; it stays `workflow_dispatch` only until the pull request trigger is proven. The sessions stay as the record. Proof: the two files are absent, and the key returns 401.
 
 ### Report
