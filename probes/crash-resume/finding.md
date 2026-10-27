@@ -55,8 +55,14 @@ The source registers no signal handler. A cancelled job may skip the removal and
 | background processes after a crash | all survived | all died | the container is removed, so nothing keeps running. A cancel was not tested. |
 | subagents after a crash | the files survived, unchanged | the files survived, and the session read the report from its history | the files are in the transcripts, kept by the store step |
 
+## Managed Agents
+
+Probed 2026-10-27 in session `sesn_016CYBjUYebbPbNDKCb2Kmx2` ([`capture-ma.md`](capture-ma.md)). Docs: https://platform.claude.com/docs/en/managed-agents/environments. The first message wrote `/tmp/crash-resume-marker` at 15:02:53Z and started `sleep 7200` as PID 259, then the session went idle. A second message 21 minutes later was accepted by `POST /v1/sessions/{id}/events` and the session answered in 18 active seconds: the marker file was there with its content, the sleeper was gone, and `/proc/uptime` read 7 seconds. So the idle sandbox was checkpointed and the resume booted a fresh kernel from that checkpoint, with the filesystem intact and every process lost, which is what the Cloud arm's idle reclaim did. The history is server-side, and the second answer shows the agent read its own first answer. A stop from the caller's side was not tested; the docs name no stop button, and a session that is deleted loses its record. The two halves cost 4 cents together. One fault on the caller's side is worth a note: the events endpoint takes `{"events": [...]}`, and a bare event is refused with 400.
+
 ## Report cells
 
 Cloud: the Stop button loses nothing, and an idle reclaim keeps the disk and the history and kills every process, so a session resumes on its own files.
 
 Platform: a factory job has no resume; the container is removed at job end and only the pushed branch, the pull request and the saved transcript remain.
+
+Managed Agents: an idle sandbox is checkpointed, and a message 21 minutes later resumed it on a fresh boot with the files intact and every process gone, the same as the Cloud arm's idle reclaim.
