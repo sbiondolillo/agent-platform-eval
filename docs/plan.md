@@ -106,7 +106,7 @@ The reviewer is step 3 of the `change` skill: the three angles of `.claude/skill
 
 - [ ] A reviewer session ends on a JSON final message: `verdict` as `accept` or `reject`, `findings` as a list of `file`, `line`, `fault`, `evidence`, `fix` and `nitpick`, and `clean` as a list of texts. Proof: the first angle's capture parses with `jq`.
 - [ ] The workflow `.github/workflows/judge.yml` on a branch of the target, on `workflow_dispatch` with a pull request number: dedupe on the head SHA by a marker comment, start one session per angle with the SHA, the base SHA, the issue body and `metadata`, poll `GET /v1/sessions/{id}` until every one is idle, compute the verdict as `CHANGES REQUESTED` when any angle rejects, start the synthesis session only then, with the three final messages as text, no repository, no `bash` and no egress, and post one review and one check run `judge`. Proof: a run on pull request 345, the review on it, and the three session ids in `probes/platform-delivery/finding.md` under `## Managed Agents`.
-- [ ] The mutation angle runs the bare `dotnet test` in the sandbox, with no Docker. If the SDK does not install, the angle stays on the platform and the finding says so.
+- [x] Decided 2026-10-27, route 3: the mutation angle stays on the platform arm, because the sandbox's apt SDK is `10.0.113` and the target's band is `10.0.4xx` (toolchain finding). The delivery runs `Conformance` and `Regressions and style` on Managed Agents. `dotnet-install.sh` with `builds.dotnet.microsoft.com` in `allowed_hosts` is a later probe, not this arm's.
 - [ ] The workflow then fires on `pull_request` `opened` and `synchronize`. Proof: a second run from a push to the pull request, with no duplicate session for a repeated event.
 
 #### Report and teardown
@@ -138,7 +138,7 @@ Decided in a grilling session on 2026-10-24. Each line is a decision, with its r
 - **Cut row.** "Gates read the tree, not the agent's report" is a property of the factory code, and both arms can hold it equally.
 - **Platform floor.** Decided 2026-10-25. The platform arm is a homelab: one runner host, a Squid proxy, a self-hosted vault and a self-hosted gateway. It stands in for an enterprise platform and is not one. The Cloud cells are fixed by the product, and the platform cells are a floor. Where an enterprise component would change a row, the platform cell carries a footnote in the report that says what changes.
 
-- **Third arm.** Decided 2026-10-27. Managed Agents is a third column on the same rows. It decides whether the factory's review moves off the runner. The job is the orchestrator, because an orchestrator session would hold the workspace API key within reach of a diff it reads. The judges come from the repo by path, so the reviewer needs no skill upload. The target is `dotnet-software-factory`, because the judges exist only there, and pull request 345 is the first subject. Three sessions per review, one per angle, and one synthesis session that orders findings and drops none.
+- **Third arm.** Decided 2026-10-27. Managed Agents is a third column on the same rows. It decides whether the factory's review moves off the runner. The job is the orchestrator, because an orchestrator session would hold the workspace API key within reach of a diff it reads. The judges come from the repo by path, so the reviewer needs no skill upload. The target is `dotnet-software-factory`, because the judges exist only there. The first subject is the pull request that builds issue #327, a direct build under the `change` skill with its step 3 handed to this arm's reviewer. Three sessions per review, one per angle, and one synthesis session that orders findings and drops none.
 
 ## Names
 
@@ -152,7 +152,7 @@ Decided in a grilling session on 2026-10-24. Each line is a decision, with its r
 | Managed Agents workspace | to be filled when created |
 | Managed Agents environment id | `env_01LppsRP6QAsjQcMATGMfiKj`; the egress probe's one-host environment is `env_01JKqi2Hmpn1wXhN5uGb9rFf` |
 | Managed Agents agent id | `agent_015ajBRYm99G5kMdMDSRsEY1` |
-| Managed Agents target | `sbiondolillo/dotnet-software-factory`, pull request 345 first |
+| Managed Agents target | `sbiondolillo/dotnet-software-factory`. Pull request 345 was merged before the arm opened, so the subject is the pull request that builds issue #327, IDE0005 at `warning`, chosen 2026-10-27 from the open issues |
 
 ## Sources
 
