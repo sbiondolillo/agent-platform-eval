@@ -113,7 +113,7 @@ The reviewer is step 3 of the `change` skill: the three angles of `.claude/skill
 
 - [ ] The table gains a third column, with every cell linked to its proof, and the conditional gains the rows the arm changes. Proof: `site/src/build.sh` passes with 48 proof links.
 - [ ] One rung for the arm, with its proof rows.
-- [ ] The API key is deleted in the Console, the read-only token is revoked, and both files are removed from the workstation. The workflow stays on its branch as evidence, unmerged. The sessions stay as the record. Proof: the two files are absent, and the key returns 401.
+- [ ] The API key is deleted in the Console, the read-only token is revoked, and both files are removed from the workstation. The workflow is merged to `main`, because `workflow_dispatch` runs only from the default branch; it stays `workflow_dispatch` only until the pull request trigger is proven. The sessions stay as the record. Proof: the two files are absent, and the key returns 401.
 
 ### Report
 
