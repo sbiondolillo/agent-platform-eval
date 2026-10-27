@@ -53,10 +53,12 @@ Probed 2026-10-27 from the workstation. Docs: https://platform.claude.com/docs/e
 
 The `session.usage` event in the transcript holds the same figures with the token counts. `list_cost` is at list price, not the contract rate, and a session on a shared agent is told apart by its metadata, so a job that tags `repo`, `pr` and `sha` gets the cost of one review per pull request from the list call. Nothing had to be exported from the sandbox.
 
+The OpenTelemetry route, proven 2026-10-27: the Claude Console's OpenTelemetry settings (Organization settings, OpenTelemetry, beta) take a telemetry destination with a provider, an OTLP endpoint, credentials in header values, a content mode and a workspace filter. Docs: https://platform.claude.com/docs/en/manage-claude/opentelemetry/api. The operator added Grafana Cloud stack `ambercroissant1151` as a destination with content mode Metadata only and the managed-agents workspace selected. Session `sesn_01RLfMHCpiSUNJLmDpw2myJ4`, created at 15:53:19Z, appeared in Tempo as trace `8e3b749d1efb663d86c92e3`, service `claude-platform`, root span `anthropic.sessions.create`, 4.95 s, found by `{ span.anthropic.session.id = "sesn_01RLfMHCpiSUNJLmDpw2myJ4" }` within the minute. The API's usage for that session is 94 output tokens, 6 input, 4370 cache read, 4462 cache write, 1 cent. The vendor emits the spans: nothing in the sandbox and nothing in the job exports, which is the opposite of both earlier arms. The spans carry `anthropic.session.id`, the environment id and the GenAI token attributes per model request, and not the session's `metadata`, so a pull request is joined to its trace by the session id the judge writes into its review comment. `list_cost` is on the API only.
+
 ## Report cells
 
 Cloud: the documented environment route exported nothing in four sessions, the Claude Code process held none of the variables, and spend is read only from Anthropic's usage view.
 
 Platform: with a nine-name pass-through in the factory, the cost metric and one event per API request land in the operator's Grafana keyed by session id, and the metric reads within one export interval of the factory's own log.
 
-Managed Agents: `usage.list_cost` per session, with the caller's `metadata` on it, gives the cost of one review keyed by pull request from a list call, with no export from the sandbox.
+Managed Agents: `usage.list_cost` per session, with the caller's `metadata` on it, gives the cost of one review keyed by pull request from a list call, and a telemetry destination in the Console sends every session's spans with token counts to Grafana Cloud with no export from the sandbox or the job.

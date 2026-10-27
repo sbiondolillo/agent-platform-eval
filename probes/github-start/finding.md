@@ -22,8 +22,14 @@ The `factory` label on an issue starts the delivery run on the self-hosted runne
 | where the result lands | in the session at claude.ai/code, under the task's History. GitHub gets only what the prompt tells the session to post. | the pull request, the job log, and the gateway ledger |
 | retry semantics | no idempotency key: each POST starts a new session. Limits 30 fires an hour per task, 100 an hour per account. A wrong token returns HTTP 401 and starts nothing. | "Re-run" on the Actions run, or `gh workflow run factory.yml`. Each attempt is a new job. |
 
+## Managed Agents
+
+Settled by the delivery, 2026-10-27 ([`../platform-delivery/finding.md`](../platform-delivery/finding.md)). Managed Agents has no GitHub trigger; a session starts only from `POST /v1/sessions`. So the start is a GitHub Actions job that holds a workspace API key as a repository secret and calls the API, the same glue shape as the Cloud arm's fire endpoint, with two differences. The credential is a workspace API key, which starts any session and reads every vault of that workspace, where the Cloud arm's token fired one saved task; the arm uses a dedicated workspace for that reason. And the job is the whole orchestrator, not a trigger: it waits for the sessions, computes the verdict and posts the result, where the Cloud session's reply stayed at claude.ai/code. There is no idempotency key on session creation, so the job dedupes on the head SHA with a marker comment before it calls the API. Both sessions were listed as `running` with their metadata 45 s after the dispatch.
+
 ## Report cells
 
 Cloud: a label can start a Cloud session, but only through a GitHub job that the repo owner writes and that holds a per-task bearer token, and the session's reply stays at claude.ai/code unless the prompt posts it back.
 
 Platform: the `factory` label starts the delivery run on the self-hosted runner directly through the workflow's `issues: labeled` trigger, gated to the repo owner, with no start credential.
+
+Managed Agents: a workflow job starts a session with a workspace API key held as a repository secret, with no trigger in the product and no idempotency key, so the job dedupes and orchestrates.

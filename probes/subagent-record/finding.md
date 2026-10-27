@@ -19,8 +19,14 @@ The factory sets the agent's `HOME` to a host directory under the job workspace,
 | survives the sandbox | the file in the VM goes with the container (reclaim step pending). The server-side transcript holds at least the report. Teleport writes no file. | yes, on the runner host, until the next job's `git clean -ffdx`. No store step in the sample workflow. |
 | per-call record | not exposed per session | the gateway ledger, one row per call under `dsf`. Subagent calls not distinguished from the parent's. |
 
+## Managed Agents
+
+Settled by the docs and the delivery, 2026-10-27. Managed Agents documents no subagent, so the `change` skill's three parallel reviewers became three sessions started by the job, each with its own id, metadata, events and cost, listed by `GET /v1/sessions` and read by `GET /v1/sessions/{id}/events` ([`../run-history/finding.md`](../run-history/finding.md)). There is no record to lose, because there is no child: every reviewer is a first-class session, and its transcript outlives its sandbox on the server, read with the API key.
+
 ## Report cells
 
 Cloud: the subagent keeps its own transcript in the VM's session folder, and the server-side transcript keeps its report and a row with its model, but whether the subagent's own transcript outlives the container is pending the reclaim step.
 
 Platform: the subagent's transcript lands beside the parent's on the runner host until the next job, it is never uploaded without the v1.2.1 store step, and the gateway ledger counts its calls under `dsf` with no link to the parent.
+
+Managed Agents: there is no subagent; each reviewer is its own session with its own server-side record, and the job is the fan-out.

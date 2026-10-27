@@ -22,8 +22,14 @@ The factory never pushes to `main`. At `v1.2.1` it pushes only a `factory/<id>` 
 
 Action, a build item under either outcome: turn on "Do not allow bypassing the above settings" on the `main` protection, or move it to a ruleset with no bypass actors, or push from an identity that is not an administrator.
 
+## Managed Agents
+
+Settled by the forge-credential probe and the delivery, 2026-10-27. The sandbox holds whatever token the caller passes, and the reviewer's token is a fine-grained read-only token, so a push from the sandbox is refused with 403 before any branch rule is reached ([`../forge-credential/finding.md`](../forge-credential/finding.md)). The review itself reaches the pull request through the job's `GITHUB_TOKEN`, scoped to one repository and dead at job end, as a comment and a check run named `judge`. Branch protection can require that check, and then a pull request merges only after the judge has passed, which is a control no session can bypass because no session holds a token that can merge. On the Cloud arm the agent pushed to protected `main` with the operator's admin credential; here the operator's credential is never in a session.
+
 ## Report cells
 
 Cloud: the session pushed to protected `main` and the push landed as an administrator bypass, because the proxy pushes as the operator's admin account and the protection lets administrators bypass, so the protection does not bind the agent.
 
 Platform: the factory's source pushes only its own branch and opens a pull request, so the required checks apply at the merge, but the PAT is on the same admin account and the protection would not stop a direct push.
+
+Managed Agents: the sandbox's token cannot push at all, and the judge reaches the pull request as a check run through the job's own scoped token, which branch protection can require.

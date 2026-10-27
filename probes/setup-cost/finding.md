@@ -139,8 +139,14 @@ The two counts are close: 25 steps for Cloud and 28 for the platform. The arms d
 - One step differs from the vault-secret finding's own count. That finding counts 2 Cloud steps and 4 platform steps for the probe only. This count adds the value generation and the inbox on the Cloud side (C9, C10), which the platform arm reuses.
 - This count covers only the listed sources. Other probes, such as egress, changed environment or allowlist settings and are not counted. So both totals are lower bounds.
 
+## Managed Agents
+
+Counted 2026-10-27 from the captures and the plan. Operator steps from zero to the first posted review: create a Console workspace and enable the beta, create its API key, create a read-only fine-grained token, write the two files (one block), set two secrets and two variables (one block), and merge the workflow pull request: 6 steps, 2 new secrets. On top of that, one Console dialog for the OpenTelemetry destination, which the row does not need. Everything else was the session's: the environment, the agent, the probes, the workflow and the delivery dispatch. The lab items the platform arm counted, a VM, a proxy, a vault and a gateway, are absent, because the sandbox, the egress list, the credential helper and the model credential are the product's.
+
 ## Report cells
 
 Cloud: Cloud Sessions took 25 operator steps and 4 secrets, all in web forms, GitHub and the workstation, with 8 steps and no secret to reach the first pull request and no lab host touched.
 
 Platform: the platform took 28 operator steps and no new secret in the experiment, on top of 9 lab items and 4 secrets that the lab already held, and it touched 3 lab hosts in the experiment and 6 with its prerequisites.
+
+Managed Agents: 6 operator steps and 2 new secrets from zero to the first posted review, with none of the platform arm's 9 lab items.

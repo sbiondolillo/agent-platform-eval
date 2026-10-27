@@ -88,3 +88,16 @@ Attempt 1 and attempt 2: none. The factory runs one agent per gate.
 ## Side effects
 
 Attempt 2: none beyond the PR branch factory/45752200.
+
+## Managed Agents
+
+Delivered 2026-10-27 ([`capture-ma.md`](capture-ma.md)). The subject is pull request [351](https://github.com/sbiondolillo/dotnet-software-factory/pull/351) of `dotnet-software-factory`, which builds issue #327 as a direct change under the `change` skill with its step 3, the review, handed to this arm. The reviewer is `.github/workflows/judge.yml` with `.github/judge/judge.py`, merged as pull request 352 at `b911c20`, because `workflow_dispatch` runs only from the default branch. Run [40532377644](https://github.com/sbiondolillo/dotnet-software-factory/actions/runs/40532377644), dispatched by hand with `-f pr=351`, took 2 min 35 s end to end. The job read the spec from issue #327 through the `Closes` line, found no marker comment for the head SHA, started one session per angle with the repository mounted through the read-only token and `metadata` of repo, pull request, SHA and angle, polled both to idle, parsed each final message as the JSON contract, computed APPROVED because both angles accepted, posted one review comment with the marker and a check run `judge` with conclusion success. The synthesis session did not run, because nothing rejected.
+
+| angle | session | tool uses | active seconds | cost |
+|---|---|---|---|---|
+| Conformance | `sesn_01B92ECTuP5GjiNPAd1ad3L7` | 12 | 94 | 10 cents |
+| Regressions and style | `sesn_01Ey3fJmAtPMBBYJ8zFefQ4W` | 14 | 130 | 14 cents |
+
+Both angles accepted with one nitpick each: the demo's `sha256sum` pin of `Directory.Build.props` in `docs/demo/4-reframe.md` no longer matches, and the starter template's two files now differ from the root files. Both are true and both were left for the author. Both reviewers reported that they could not build: Docker is absent, the SDK is `10.0.113`, and `dotnet restore` could not reach `api.nuget.org`, because `allow_package_managers: true` does not open NuGet. So the review is a read of the diff, and the build proof stays with the pull request's own `build` and `integration` checks, which were green. That is the gates-read-the-tree rule holding in a new place: the judge's verdict is a reading of the tree, and the build is code the job did not have to repeat.
+
+Cell for the report: the workflow job started one session per angle with a read-only token, both accepted pull request 351 in 2 min 35 s for 24 cents, and the job posted the review and the check run with its own token.
