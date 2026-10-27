@@ -2,6 +2,10 @@
 
 The to-do list comes first. The settled design follows as reference. A step is done when its completion criterion holds. Tick the box and write the proof on the same line.
 
+## Status 2026-10-27
+
+A third arm is open: Managed Agents, the Claude API's server-hosted agent with a managed sandbox, beta header `managed-agents-2026-04-01`. The sixteen rows get a third column. Its delivery is the `change` skill's three judges on a pull request, started by a workflow job. The to-do is under [Managed Agents arm](#managed-agents-arm), and nothing above it changes.
+
 ## Status 2026-10-25
 
 Both arms delivered issue #1 with an approved review. PR 5 (Cloud) and PR 6 (platform) stay open and unmerged as evidence. On 2026-10-24 and 2026-10-25 the issue #2 probes ran for all sixteen rows, plus the `@claude` side experiment. Each has `probes/<row>/finding.md` and a tick below, with a one-sentence cell per arm at the end of the finding. Three controls fired on probe prompts and are recorded in `probes/audit-record/finding.md`. The last three rows closed on 2026-10-25: spend-attribution ran against a Grafana Cloud stack (ambercroissant1151, trial ends 2026-11-07), with nothing from four Cloud sessions and the per-session cost metric and events from a throwaway factory branch; crash-resume closed after the idle reclaim; setup-cost is counted. The report is published at https://sbiondolillo.github.io/agent-platform-eval/ from `site/`, built by `site/src/build.sh`. The teardown ran on 2026-10-25 and every item below is ticked. The experiment is closed. One stray branch, `factory/ba374b22`, remains on the sample repo with no pull request; it was not on the teardown list.
@@ -65,6 +69,52 @@ One probe session per row, on issue #2's branch or on no branch. A probe never t
 
 - [x] The Claude GitHub App is installed on the target repo. An `@claude` mention on issue #2 is answered. Finding: where the run executed, an Actions log on a GitHub runner or a session at claude.ai/code. Proof: [`probes/claude-mention/finding.md`](../probes/claude-mention/finding.md).
 
+### Managed Agents arm
+
+Decided 2026-10-27. The docs fill most cells, so a row is proven by its docs URL, plus one session where the docs are silent. A probe adds a `## Managed Agents` section and a report cell to the row's existing `finding.md`, with its capture as `capture-ma.*` and its prompt under `## Managed Agents` in the row's `prompt.md`. A capture records a credential's presence and shape only. The docs index is https://platform.claude.com/docs/en/managed-agents/overview. The spend of the arm is the sum of `usage.list_cost` over its sessions, and it stops at 5000 cents.
+
+#### Setup
+
+- [ ] A dedicated Console workspace with the beta enabled, and one API key from it, on the workstation at `~/.config/managed-agents/api-key.env` as `ANTHROPIC_API_KEY`. Proof: `GET /v1/sessions` with the beta header returns 200.
+- [ ] A fine-grained token on `sbiondolillo/dotnet-software-factory` alone, with Contents, Pull requests and Metadata read, at `~/.config/managed-agents/github-ro.env` as `GITHUB_RO_TOKEN`. Proof: the token reads pull request 345, and a push dry run with it is refused.
+- [ ] An environment with `networking.type: limited`, `allowed_hosts` empty, and `packages` that install the .NET SDK that `global.json` of the target pins. Proof: the environment id in Names.
+- [ ] An agent `judge` on `claude-sonnet-5-5`, with `bash`, `read`, `glob` and `grep` enabled and `web_fetch` and `web_search` disabled, with no MCP server. Proof: the agent id in Names.
+- [ ] Every session carries `budget.max_list_cost` of 500 cents and `metadata` with `arm`, `row` and, for the delivery, `repo`, `pr` and `sha`. Proof: the first session's create body in `probes/substrate/capture-ma.md`.
+
+#### Probes
+
+One session per row where the docs are silent. A row the docs settle gets its URL and one sentence, with no session.
+
+- [ ] **substrate** and **toolchain**, one session: `uname -a`, `id`, `capsh --print`, `systemd-detect-virt`, `dotnet --version`. Finding: who runs the code, as what user, with which capabilities, and whether the pinned SDK installs through `packages`. The SDK result decides whether the mutation angle of the delivery runs on this arm.
+- [ ] **forge-credential**: with a `github_repository` resource, search the environment, the files, the git config and the process list for the token's shape. Then `git push --dry-run`. Finding: where the token sits, whether the agent can read it, and the refusal of the push.
+- [ ] **model-credential**: the same search for an Anthropic key or token. The docs put the model call server-side. Finding: the absence, confirmed.
+- [ ] **audit-record**: from the sandbox, look for any credential or route that reaches the session's own events. Finding: the record a compromised agent cannot erase, which the docs say is every event.
+- [ ] **egress**: on the limited environment with one allowed host, `curl` to that host, to `open-meteo.com`, to a raw IP and to a port other than 443. Finding: what each returns.
+- [ ] **tool-model-policy**: create a session as `agent_with_overrides` with a model outside the pin, and from a session call an MCP server the agent does not declare. Finding: the control that stopped each, or none.
+- [ ] **repo-skills**, a sub-row of toolchain: with the target mounted, ask the session which skills it loaded at start. Finding: whether `.claude/skills/change/SKILL.md` loads, and what `disable-model-invocation: true` does there.
+- [ ] **vault-secret**: an `environment_variable` vault credential for a throwaway host, and that host in `allowed_hosts`. From the sandbox, `env` shows the placeholder, and the host's log shows the value. Finding: where the value is attached.
+- [ ] **run-history**: `GET /v1/sessions` filtered by `agent_id`, and `GET /v1/sessions/{id}/events` for a session whose sandbox is gone. Finding: the export path.
+- [ ] **spend-attribution**: `usage.list_cost` of one session, read back by its id and found by its `metadata`. Finding: the cost per session, keyed.
+- [ ] **cloud-logging**: a session runs a command that fails. Finding: whether the events hold the full stderr, read by API.
+- [ ] **crash-resume**: let a session idle past reclaim, then send a message. Finding: what survived.
+- [ ] **github-start**, **branch-protection** and **subagent-record** are settled by the delivery and the docs: the job starts the sessions with the API key, the sandbox holds a read-only token, and no subagent is documented, so the job is the fan-out. Finding: one sentence each, with the delivery's run as proof.
+- [ ] **setup-cost**: the steps and secrets from zero to the first posted review, counted from the captures.
+
+#### Delivery
+
+The reviewer is step 3 of the `change` skill: the three angles of `.claude/skills/change/JUDGES.md`, which the session reads by path from the mounted repo. Each angle is one session, and a fourth session writes the review prose. The job is the orchestrator: it starts the sessions with the API key, computes the verdict in code, and posts with its own `GITHUB_TOKEN`. The sessions hold the read-only token and nothing else.
+
+- [ ] A reviewer session ends on a JSON final message: `verdict` as `accept` or `reject`, `findings` as a list of `file`, `line`, `fault`, `evidence`, `fix` and `nitpick`, and `clean` as a list of texts. Proof: the first angle's capture parses with `jq`.
+- [ ] The workflow `.github/workflows/judge.yml` on a branch of the target, on `workflow_dispatch` with a pull request number: dedupe on the head SHA by a marker comment, start one session per angle with the SHA, the base SHA, the issue body and `metadata`, poll `GET /v1/sessions/{id}` until every one is idle, compute the verdict as `CHANGES REQUESTED` when any angle rejects, start the synthesis session only then, with the three final messages as text, no repository, no `bash` and no egress, and post one review and one check run `judge`. Proof: a run on pull request 345, the review on it, and the three session ids in `probes/platform-delivery/finding.md` under `## Managed Agents`.
+- [ ] The mutation angle runs the bare `dotnet test` in the sandbox, with no Docker. If the SDK does not install, the angle stays on the platform and the finding says so.
+- [ ] The workflow then fires on `pull_request` `opened` and `synchronize`. Proof: a second run from a push to the pull request, with no duplicate session for a repeated event.
+
+#### Report and teardown
+
+- [ ] The table gains a third column, with every cell linked to its proof, and the conditional gains the rows the arm changes. Proof: `site/src/build.sh` passes with 48 proof links.
+- [ ] One rung for the arm, with its proof rows.
+- [ ] The API key is deleted in the Console, the read-only token is revoked, and both files are removed from the workstation. The workflow stays on its branch as evidence, unmerged. The sessions stay as the record. Proof: the two files are absent, and the key returns 401.
+
 ### Report
 
 - [x] The table in `site/` has sixteen rows and two columns. Every cell links its proof. Proof: `site/index.html` built from `site/src/build.sh`, 16 rows and 32 proof links checked by the build, 12 footnotes on platform cells, 2026-10-25.
@@ -88,6 +138,8 @@ Decided in a grilling session on 2026-10-24. Each line is a decision, with its r
 - **Cut row.** "Gates read the tree, not the agent's report" is a property of the factory code, and both arms can hold it equally.
 - **Platform floor.** Decided 2026-10-25. The platform arm is a homelab: one runner host, a Squid proxy, a self-hosted vault and a self-hosted gateway. It stands in for an enterprise platform and is not one. The Cloud cells are fixed by the product, and the platform cells are a floor. Where an enterprise component would change a row, the platform cell carries a footnote in the report that says what changes.
 
+- **Third arm.** Decided 2026-10-27. Managed Agents is a third column on the same rows. It decides whether the factory's review moves off the runner. The job is the orchestrator, because an orchestrator session would hold the workspace API key within reach of a diff it reads. The judges come from the repo by path, so the reviewer needs no skill upload. The target is `dotnet-software-factory`, because the judges exist only there, and pull request 345 is the first subject. Three sessions per review, one per angle, and one synthesis session that orders findings and drops none.
+
 ## Names
 
 | name | value |
@@ -97,6 +149,10 @@ Decided in a grilling session on 2026-10-24. Each line is a decision, with its r
 | throwaway hostname | to be filled when created |
 | model, both arms | `claude-sonnet-5-5`, hard-coded in the factory and pinned in the target's `.claude/settings.json`. The pin did not apply to the Cloud session picker: see [the finding](../probes/cloud-environment/finding.md). |
 | credit expiry | 2026-11-05 |
+| Managed Agents workspace | to be filled when created |
+| Managed Agents environment id | to be filled when created |
+| Managed Agents agent id | to be filled when created |
+| Managed Agents target | `sbiondolillo/dotnet-software-factory`, pull request 345 first |
 
 ## Sources
 

@@ -12,4 +12,4 @@ Every cell on the Cloud Sessions side is proven by a probe run in the real produ
 
 The report is published at https://sbiondolillo.github.io/agent-platform-eval/ .
 
-The platform arm is the factory at `v1.1.0` on a self-hosted runner in a lab VM. The target repo for both arms is named in `docs/plan.md` once it exists.
+The platform arm is the factory at `v1.1.0` on a self-hosted runner in a lab VM. The target repo for both arms is named in `docs/plan.md` once it exists. A third arm, Managed Agents, opened on 2026-10-27, and its to-do is in `docs/plan.md` under "Managed Agents arm".
