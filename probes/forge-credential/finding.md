@@ -23,8 +23,23 @@ The runner host `sandbox-01` carries two GitHub credentials, and neither enters 
 
 The attempt 1 refusal is itself a reading for the [tool-model-policy](../../docs/plan.md) row: the model-side safeguard stopped a self-directed credential sweep and switched models, where the identical sweep for an Anthropic key one probe earlier was answered.
 
+## Managed Agents
+
+Probed 2026-10-27 in session `sesn_01DEn3e9vkgUfUE1gLFDyTMU`, with the target mounted through a `github_repository` resource and the read-only fine-grained token as `authorization_token` ([`capture-ma.md`](capture-ma.md)). Docs: https://platform.claude.com/docs/en/managed-agents/github. The create response did not echo the token. Inside the sandbox, no environment variable and no file under `/root`, `/home`, `/workspace`, `/tmp` or `/etc` holds a `ghp_` or `github_pat_` string, and the clone's remote URL carries no credential. The credential reaches git through `/root/.gitconfig`: `credential.https://github.com.helper=/usr/local/bin/git-credential-anthropic`, and the same helper with `scoped-only` for every other HTTPS host, so the token is injected per request by a helper, the same shape as the Cloud Sessions proxy. The clone is shallow, so a reviewer that needs an older base commit must fetch it. `git fetch --dry-run` reached the remote. `git push --dry-run` was refused with 403, "Permission to sbiondolillo/dotnet-software-factory.git denied to sbiondolillo", so the token is the operator's own account with read scope, and the refusal is the token's, not the platform's. `gh` is not installed. A bare `curl` to `api.github.com` returns 403 even though `allow_package_managers: true` opens that host, so the GitHub API is not a route for the agent without a credential the caller supplies. The sandbox also carries `ANTHROPIC_COMMIT_TOKEN`, 61 characters, prefix `ANTH`, with `ANTHROPIC_COMMIT_SIGN_URL` at `api.anthropic.com`, and `/root/.gitconfig` signs every commit with `/usr/local/bin/commit-signer-anthropic` as the SSH signing program, under `user.name = Claude`. The audit-record probe tests whether that token reaches the API. The session cost 12 cents in 197 active seconds.
+
+| row | Managed Agents |
+|---|---|
+| credential inside the sandbox (shape) | none on disk or in the environment. A credential helper, `git-credential-anthropic`, injects the caller's token per request. |
+| identity on the forge | the token's own: here the operator's account, with read scope |
+| permission on the target repo | fetch yes, push refused 403 |
+| reach beyond the target repo | the token's scope; not probed |
+| lifetime | the fine-grained token's expiry, set by the operator |
+| commit signing | every commit signed by `commit-signer-anthropic` with `ANTHROPIC_COMMIT_TOKEN`, as `Claude <noreply@anthropic.com>` |
+
 ## Report cells
 
 Cloud: the sandbox holds no token on disk, but the managed proxy injects the operator's own account credential with admin on the one granted repo, scoped away from the owner's other repos until `add_repo` is called.
 
 Platform: the agent's container holds no forge credential at all; the operator's fine-grained PAT and a job-scoped Actions token both sit in the factory process on the host, and the pull request is opened under the operator account.
+
+Managed Agents: the sandbox holds no forge token on disk or in its environment; a credential helper injects whatever token the caller passed, so a read-only token gives fetch and a 403 on push, and the identity on the forge is the token's.

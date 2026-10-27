@@ -40,8 +40,23 @@ The exporter is silent on failure in every arm. No log line, in the CLI or the A
 - Server-managed settings as the Cloud route is untested.
 - For DSF v2, a factory that passes the telemetry names natively. It sets cumulative temporality, and either flushes on exit or sums cost over the events.
 
+## Managed Agents
+
+Probed 2026-10-27 from the workstation. Docs: https://platform.claude.com/docs/en/managed-agents/session-observability. Each session carries the `metadata` the create body set, `arm` and `row`, and `usage.list_cost` in whole cents. The list by agent read back, on 2026-10-27:
+
+| session | row | list_cost (cents) | active seconds |
+|---|---|---|---|
+| `sesn_01BdfqEvYjyeHEFzS61c1VgR` | substrate | 6 | 53 |
+| `sesn_01DEn3e9vkgUfUE1gLFDyTMU` | forge-credential | 12 | 197 |
+| `sesn_01CzTF7pWYJrPg4cnkJsLcor` | egress | 3 | 46 |
+| `sesn_01ShSm9niXACrBsUXsV7xeD9` | tool-model-policy | 3 | 7 |
+
+The `session.usage` event in the transcript holds the same figures with the token counts. `list_cost` is at list price, not the contract rate, and a session on a shared agent is told apart by its metadata, so a job that tags `repo`, `pr` and `sha` gets the cost of one review per pull request from the list call. Nothing had to be exported from the sandbox.
+
 ## Report cells
 
 Cloud: the documented environment route exported nothing in four sessions, the Claude Code process held none of the variables, and spend is read only from Anthropic's usage view.
 
 Platform: with a nine-name pass-through in the factory, the cost metric and one event per API request land in the operator's Grafana keyed by session id, and the metric reads within one export interval of the factory's own log.
+
+Managed Agents: `usage.list_cost` per session, with the caller's `metadata` on it, gives the cost of one review keyed by pull request from a list call, with no export from the sandbox.

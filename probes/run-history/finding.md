@@ -26,8 +26,14 @@ The gateway ledger, `telemetry.gateway_calls`, holds one row per model call with
 | retention | per account: 30 days, or 5 years on a consumer plan that allows model improvement. Deleting a session removes its data. | job log 90 days. Store repo until deleted. Ledger keeps every row, cold after 90 days. Runner host until the next run. |
 | documented API | none for listing or reading. Only the scheduled-task `/fire` endpoint, which starts a session. | GitHub REST for runs, logs and artifacts. The ledger is our own ClickHouse table. |
 
+## Managed Agents
+
+Probed 2026-10-27 from the workstation. Docs: https://platform.claude.com/docs/en/managed-agents/session-operations. `GET /v1/sessions?agent_id=agent_015ajBRYm99G5kMdMDSRsEY1` returned the five sessions of the arm with `id`, `status`, `metadata` and `usage.list_cost` in one page. `GET /v1/sessions/{id}/events?limit=100` returned every event of an idle session, 34 for the substrate probe and 74 for the forge-credential probe, with the agent's messages, each tool call and its result, thinking, and the `session.usage` snapshot. The captures in this arm are those events, written to `capture-ma.md` by a script on the workstation. A metadata filter on the list is not documented, and the list was filtered by agent and read by `metadata.row` on the client.
+
 ## Report cells
 
 Cloud: sessions are listed and read only inside the product, in the web UI, the Share link, `claude --teleport` and the in-session MCP tools, and no documented API or CLI command lists them or exports a transcript to a file.
 
 Platform: `gh` lists the runs and downloads the 90-day job log, the gateway ledger holds every model call, and the model transcripts are files that the v1.2.1 starter pushes to a private store repo, but this target repo's v1.1.0 workflow has no store step, so they stay on the runner host only until the next run.
+
+Managed Agents: `GET /v1/sessions` lists sessions by agent with their metadata and cost, and `GET /v1/sessions/{id}/events` exports the whole transcript, so every capture of this arm came out by API.
