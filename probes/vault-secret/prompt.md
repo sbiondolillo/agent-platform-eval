@@ -12,3 +12,7 @@ Check that the network secret I configured for webhook.site works. Do not change
 
 End with one sentence: whether the secret value is visible anywhere inside the sandbox, and whether the request left the sandbox with the header.
 ```
+
+## Managed Agents
+
+Setup by `POST /v1/vaults`, then `POST /v1/vaults/{id}/credentials` with `auth.type: environment_variable`, `secret_name: PROBE_SECRET`, `networking.allowed_hosts: [webhook.site]` and `injection_location: {header: true}`, an environment with `allowed_hosts: [webhook.site]`, and a session with `vault_ids`. The message asked for the variable's presence and length, one `curl` to the inbox with the variable in a header, one to a host outside the credential's list, and the verbose request line. The model-side safeguard refused it before any command ran, so the message is not reproduced here; the session's events hold it.

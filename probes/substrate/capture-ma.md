@@ -140,3 +140,37 @@ ls: cannot access '/root/.claude': No such file or directory
 I made one transcription error in the `ps` output. PID 38 is `rcu_tasks_rude_kthread`, but I wrote `kworker/R-rcu_tasks_rude_kthread` above. The other lines match what the command printed.
 
 DONE
+
+## Create body
+
+The `POST /v1/sessions` body, with the prompt elided:
+
+```json
+{
+  "agent": "agent_015ajBRYm99G5kMdMDSRsEY1",
+  "environment_id": "env_01LppsRP6QAsjQcMATGMfiKj",
+  "title": "probe substrate+toolchain",
+  "budget": {
+    "type": "limit",
+    "max_list_cost": {
+      "amount": "500",
+      "currency": "USD"
+    }
+  },
+  "metadata": {
+    "arm": "managed-agents",
+    "row": "substrate"
+  },
+  "initial_events": [
+    {
+      "type": "user.message",
+      "content": [
+        {
+          "type": "text",
+          "text": "<the prompt above>"
+        }
+      ]
+    }
+  ]
+}
+```

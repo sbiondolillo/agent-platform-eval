@@ -21,8 +21,14 @@ Infisical holds the secret as `PROBE_SECRET` in the `dsf` project, environment `
 | credential types the vault can attach | nine: Bearer, Basic, Body parameter, AWS SigV4, GCP access token, GCP IAP, OAuth 2.0 JWT bearer, OAuth 2.0 client credentials, MCP Connector | any string. The vault attaches nothing: the script does, so a signing or token-exchange scheme is code the factory owner writes. |
 | operator steps for this probe | 2, in one dialog: add the secret, with its allowed website and header | 4: add the secret in Infisical, widen the Squid allowlist, merge the workflow, dispatch it |
 
+## Managed Agents
+
+Probed 2026-10-27 in session `sesn_01C1A32W15PjyYNbwrrh9i1Q`. Docs: https://platform.claude.com/docs/en/managed-agents/vaults. The setup half is proven: vault `vlt_011CgSweaXP6wbjoudWr23MV` was created, credential `vcrd_01DAWx7tYLhraGohWcwQUgxD` of type `environment_variable` was accepted with its `allowed_hosts` and `injection_location`, the create response did not echo the value, environment `env_01D7JiCajKVLmAFKLAwSFLNm` allows `webhook.site`, and the session was created with `vault_ids` set. The attachment half is not: the model-side safeguard refused the message before any command ran, `stop_details.type: refusal`, `category: cyber`, 0 cents, and the inbox received no request. The message was the Cloud arm's probe, one `curl` with the variable in a header, and on the Cloud arm the same shape ran. The probe was not reworded, so the cell rests on the docs: the sandbox holds an opaque placeholder under `PROBE_SECRET`, and the value is substituted at egress for the credential's `allowed_hosts` only. A reworded probe is the operator's call, with the Cloud arm's forge-credential precedent, where a second framing was answered.
+
 ## Report cells
 
 Cloud: the managed proxy attaches the secret on the way out and only to its allowed hosts, so the agent's VM never holds a value it can read.
 
 Platform: `infisical run` puts the secret in the runner job's environment, so the factory process can read it and must attach it itself, and the agent's container gets it only when the factory passes it by name.
+
+Managed Agents: the docs put the value on the egress path for the credential's listed hosts, with a placeholder in the sandbox; the vault and the binding were accepted, and the one-request test was refused by the model-side safeguard.
