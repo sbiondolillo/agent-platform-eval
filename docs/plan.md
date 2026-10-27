@@ -75,17 +75,17 @@ Decided 2026-10-27. The docs fill most cells, so a row is proven by its docs URL
 
 #### Setup
 
-- [ ] A dedicated Console workspace with the beta enabled, and one API key from it, on the workstation at `~/.config/managed-agents/api-key.env` as `ANTHROPIC_API_KEY`. Proof: `GET /v1/sessions` with the beta header returns 200.
-- [ ] A fine-grained token on `sbiondolillo/dotnet-software-factory` alone, with Contents, Pull requests and Metadata read, at `~/.config/managed-agents/github-ro.env` as `GITHUB_RO_TOKEN`. Proof: the token reads pull request 345, and a push dry run with it is refused.
-- [ ] An environment with `networking.type: limited`, `allowed_hosts` empty, and `packages` that install the .NET SDK that `global.json` of the target pins. Proof: the environment id in Names.
-- [ ] An agent `judge` on `claude-sonnet-5-5`, with `bash`, `read`, `glob` and `grep` enabled and `web_fetch` and `web_search` disabled, with no MCP server. Proof: the agent id in Names.
+- [x] A dedicated Console workspace with the beta enabled, and one API key from it, on the workstation at `~/.config/managed-agents/api-key.env` as `ANTHROPIC_API_KEY`. Proof: `GET /v1/sessions` with the beta header returned 200 with zero sessions, 2026-10-27.
+- [ ] A fine-grained token on `sbiondolillo/dotnet-software-factory` alone, with Contents, Pull requests and Metadata read, at `~/.config/managed-agents/github-ro.env` as `GITHUB_RO_TOKEN`. Proof so far, 2026-10-27: the token read pull request 345, and `user/repos?visibility=private` returned 0 repos against the operator's 11. The push dry run is the forge-credential probe's.
+- [x] An environment with `networking.type: limited`, `allowed_hosts` empty, and `packages` that install the .NET SDK that `global.json` of the target pins. The docs require `allow_package_managers: true` with `packages`, and that opens the Ubuntu archive, GitHub and the other package hosts listed under the networking docs, so `allowed_hosts` empty is not egress empty. Proof: `env_01LppsRP6QAsjQcMATGMfiKj`, created 2026-10-27 with `apt: [dotnet-sdk-10.0]`. Whether the SDK installs is the toolchain probe's.
+- [x] An agent `judge` on `claude-sonnet-5-5`, with `bash`, `read`, `glob` and `grep` enabled and `web_fetch` and `web_search` disabled, with no MCP server. Proof: `agent_015ajBRYm99G5kMdMDSRsEY1` version 1, created 2026-10-27; the read-back shows the two tools `enabled: false` and `default_config.enabled: true`.
 - [ ] Every session carries `budget.max_list_cost` of 500 cents and `metadata` with `arm`, `row` and, for the delivery, `repo`, `pr` and `sha`. Proof: the first session's create body in `probes/substrate/capture-ma.md`.
 
 #### Probes
 
 One session per row where the docs are silent. A row the docs settle gets its URL and one sentence, with no session.
 
-- [ ] **substrate** and **toolchain**, one session: `uname -a`, `id`, `capsh --print`, `systemd-detect-virt`, `dotnet --version`. Finding: who runs the code, as what user, with which capabilities, and whether the pinned SDK installs through `packages`. The SDK result decides whether the mutation angle of the delivery runs on this arm.
+- [x] **substrate** and **toolchain**, one session: `uname -a`, `id`, `capsh --print`, `systemd-detect-virt`, `dotnet --version`. Finding: who runs the code, as what user, with which capabilities, and whether the pinned SDK installs through `packages`. The SDK result decides whether the mutation angle of the delivery runs on this arm. Proof: [`probes/substrate/finding.md`](../probes/substrate/finding.md) and [`probes/toolchain/finding.md`](../probes/toolchain/finding.md), session `sesn_01BdfqEvYjyeHEFzS61c1VgR`, 2026-10-27. Result: root in a Docker container inside a Firecracker microVM, and the apt SDK is `10.0.113`, outside the target's `10.0.4xx` band, so the mutation angle waits on an SDK route.
 - [ ] **forge-credential**: with a `github_repository` resource, search the environment, the files, the git config and the process list for the token's shape. Then `git push --dry-run`. Finding: where the token sits, whether the agent can read it, and the refusal of the push.
 - [ ] **model-credential**: the same search for an Anthropic key or token. The docs put the model call server-side. Finding: the absence, confirmed.
 - [ ] **audit-record**: from the sandbox, look for any credential or route that reaches the session's own events. Finding: the record a compromised agent cannot erase, which the docs say is every event.
@@ -150,8 +150,8 @@ Decided in a grilling session on 2026-10-24. Each line is a decision, with its r
 | model, both arms | `claude-sonnet-5-5`, hard-coded in the factory and pinned in the target's `.claude/settings.json`. The pin did not apply to the Cloud session picker: see [the finding](../probes/cloud-environment/finding.md). |
 | credit expiry | 2026-11-05 |
 | Managed Agents workspace | to be filled when created |
-| Managed Agents environment id | to be filled when created |
-| Managed Agents agent id | to be filled when created |
+| Managed Agents environment id | `env_01LppsRP6QAsjQcMATGMfiKj` |
+| Managed Agents agent id | `agent_015ajBRYm99G5kMdMDSRsEY1` |
 | Managed Agents target | `sbiondolillo/dotnet-software-factory`, pull request 345 first |
 
 ## Sources

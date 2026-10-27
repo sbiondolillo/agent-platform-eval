@@ -23,8 +23,14 @@ The factory builds the sandbox image itself on the runner host, from `sandbox/Do
 
 Two differences matter for DSF v2. First, Cloud Sessions rebuilds the toolchain on its own, on a change or after about seven days, while the platform image stays as built until someone deletes it, so a new Claude Code release or SDK patch does not reach the platform by itself. Second, the Cloud toolchain lives in a web dialog outside version control, while the platform toolchain is a Dockerfile in the factory repo at a release tag.
 
+## Managed Agents
+
+Probed 2026-10-27 in the substrate session `sesn_01BdfqEvYjyeHEFzS61c1VgR` ([`../substrate/capture-ma.md`](../substrate/capture-ma.md)). Docs: https://platform.claude.com/docs/en/managed-agents/environments. The environment's `packages` field takes apt names from the Ubuntu archive only, and it needs `allow_package_managers: true`, which opens the Ubuntu, GitHub, PyPI, npm and other package hosts to the sandbox whatever `allowed_hosts` says. `apt: [dotnet-sdk-10.0]` installed SDK `10.0.113` at `/usr/lib/dotnet/sdk`, the Ubuntu feature band. The target's `global.json` pins `10.0.401` with `rollForward: latestPatch`, which accepts a `10.0.4xx` SDK only, so `dotnet build` in the mounted repo refuses `10.0.113`. The first session on a fresh environment took 53 active seconds end to end, SDK install included. Three ways to a `10.0.4xx` SDK, none proven: `dotnet-install.sh` in the session with `builds.dotnet.microsoft.com` and `dotnet.microsoft.com` in `allowed_hosts`, which runs on every session; a `pip` or `npm` package that carries the SDK, which the docs do not list; or a `global.json` edit in the reviewer's own clone, which changes the compiler the review builds with.
+
 ## Report cells
 
 Cloud: a setup script in the environment installs the SDK once, and later sessions start from a filesystem snapshot that the docs say is rebuilt on a script or allowlist change and after about seven days, but the UI shows no setup duration.
 
 Platform: the factory builds a 2.11 GB image from its own Dockerfile on the runner host at first use in about 66 s, each job then pays about 16 s of toolchain setup, and the image never expires and changes only when someone deletes it.
+
+Managed Agents: `packages` installs the Ubuntu archive's `dotnet-sdk-10.0`, which is `10.0.113`, in a first session of 53 active seconds, and the target's `10.0.4xx` band needs a route the docs do not give.

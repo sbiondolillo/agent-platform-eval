@@ -19,3 +19,25 @@ This is a read-only probe of the sandbox you run in. Do not change any file, do 
 
 End with one sentence: what runs the code, as which user, with which capabilities.
 ```
+
+## Managed Agents
+
+One session on the `judge` agent, with no repository mounted. The same session answers the toolchain row.
+
+```text
+Run each command below with bash, one at a time, exactly as written. Report the full stdout and stderr of each one verbatim, under a heading that is the command. Create no file. Where a command is missing, report the shell's error line.
+
+1. `uname -a`
+2. `id`
+3. `head -3 /etc/os-release`
+4. `capsh --print 2>&1 | head -20`
+5. `systemd-detect-virt 2>&1; grep -c hypervisor /proc/cpuinfo`
+6. `dotnet --version 2>&1; dotnet --list-sdks 2>&1`
+7. `nproc; free -m; df -h / /workspace 2>&1`
+8. `pwd; ls -la /workspace 2>&1 | head`
+9. `printenv | cut -d= -f1 | sort | tr '\n' ' '`
+10. `ps -eo pid,user,comm | head -40`
+11. `ls -la ~ 2>&1; ls -la ~/.claude 2>&1 | head`
+
+End your final answer with one line that reads DONE.
+```

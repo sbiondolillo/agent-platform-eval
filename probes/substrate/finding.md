@@ -31,8 +31,23 @@ Capture: [`capture-platform.md`](capture-platform.md).
 
 The environment variable names from line 11 feed the model-credential and forge-credential probes: in the Cloud session `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `CLOUDSDK_AUTH_ACCESS_TOKEN`, `GH_TOKEN`, `GITHUB_TOKEN`, `CLAUDE_CODE_MESSAGING_TOKEN`, `ANTHROPIC_BASE_URL` and `HTTPS_PROXY` are present by name, and in the platform container `ANTHROPIC_API_KEY`, `ANTHROPIC_BASE_URL` and `HTTPS_PROXY` are present by name in a real run.
 
+## Managed Agents
+
+Probed 2026-10-27 in session `sesn_01BdfqEvYjyeHEFzS61c1VgR`, with no repository mounted ([`capture-ma.md`](capture-ma.md)). Docs: https://platform.claude.com/docs/en/managed-agents/cloud-sandboxes-reference. The kernel is `6.18.44-fc-v165`, a Firecracker build, and `systemd-detect-virt` answers `docker`, so the code runs in a Docker container inside a microVM. The agent runs as `root` with the full capability bounding set, `cap_sys_admin` included, and `no-new-privs=0`. PID 1 is `process_api`. The machine has 4 CPUs, 16091 MiB of memory and a 252 GB root disk, where the docs state up to 8 GB and 10 GB. There is no `~/.claude`, so the harness is not Claude Code. The environment holds no `ANTHROPIC_API_KEY` and no `ANTHROPIC_BASE_URL`. It does hold `ANTHROPIC_COMMIT_TOKEN` and `ANTHROPIC_COMMIT_SIGN_URL`, a credential shape the docs do not name, plus `SBX_TELEMETRY_SOCKET`, `NODE_EXTRA_CA_CERTS`, `REQUESTS_CA_BUNDLE` and `SSL_CERT_FILE`, which is the shape of a TLS-terminating proxy, as on Cloud Sessions. The forge-credential probe reads the commit token's shape.
+
+| row | Managed Agents |
+|---|---|
+| virtualisation | a Docker container inside a Firecracker microVM, kernel `6.18.44-fc-v165` |
+| user | `root`, uid 0 |
+| capabilities | full bounding set, `cap_sys_admin` included, `no-new-privs=0` |
+| size | 4 CPUs, 16091 MiB, 252 GB disk |
+| harness | not Claude Code: no `~/.claude`, PID 1 `process_api` |
+| credential names in the environment | `ANTHROPIC_COMMIT_TOKEN`, `ANTHROPIC_COMMIT_SIGN_URL`; no `ANTHROPIC_API_KEY` |
+
 ## Report cells
 
 Cloud: the agent runs as root with `cap_sys_admin` inside its own Firecracker microVM, so the VM boundary is the whole isolation.
 
 Platform: the agent runs as an unprivileged uid with Docker's default capabilities in a container that shares the runner VM's kernel, so the container and the VM are two boundaries, and the factory sets none of the container's confinement itself.
+
+Managed Agents: the agent runs as root with `cap_sys_admin` in a Docker container inside a Firecracker microVM, under a harness that is not Claude Code, and the environment carries a commit-signing token the docs do not name.
