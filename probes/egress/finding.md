@@ -29,8 +29,24 @@ The container's traffic goes to Squid on `egress-01`, which allows hosts per sou
 
 Two differences matter for DSF v2. First, the allow rule: Cloud Sessions allows an exact hostname set in the environment, with a toggle for package managers, while the platform allows hosts per source address on a Squid list that the operator edits by hand for each new host. Second, the direct path: Cloud Sessions intercepts direct port 443 at its gateway, which accepts the handshake and answers itself, while the platform drops the connection at the firewall. Both stop the data, but on Cloud Sessions a test that checks only the TCP handshake reports the path as open.
 
+## Managed Agents
+
+Probed 2026-10-27 in session `sesn_01CzTF7pWYJrPg4cnkJsLcor` on environment `env_01JKqi2Hmpn1wXhN5uGb9rFf`, `limited` with `allowed_hosts: [api.nuget.org]` and both `allow_*` flags false ([`capture-ma.md`](capture-ma.md)). Docs: https://platform.claude.com/docs/en/managed-agents/environments#networking. The control is the resolver: an unlisted name gets no answer, so `curl` to `open-meteo.com`, `archive.ubuntu.com` and `github.com` exits 6 before any connection, and `getent hosts open-meteo.com` returns nothing. The allowed host answers 200 on 443 and 301 on 80. A raw IP, `https://1.1.1.1/`, exits 60, a certificate mismatch, so something answered the connection with a certificate that is not Cloudflare's, and the three `*_CA_*` variables point every client at `/etc/ssl/certs/ca-certificates.crt`, which is the shape of a TLS-terminating proxy. A port other than 443 on the allowed host, and a raw TCP connect to `1.1.1.1:53`, time out. `https://api.anthropic.com/` returns 403 with exit 0, so that host is reachable from a sandbox whose list does not name it; the 403 is the answer to a bare GET, and whether the proxy or the API wrote it is not settled. `ss` and `ip` are not installed. The session cost 3 cents in 46 active seconds.
+
+| request | result |
+|---|---|
+| allowed host, 443 | 200 |
+| allowed host, 80 | 301 |
+| allowed host, 8443 | timeout, exit 28 |
+| unlisted name | no DNS answer, exit 6 |
+| raw IP, 443 | certificate mismatch, exit 60 |
+| raw TCP, 1.1.1.1:53 | timeout |
+| `api.anthropic.com`, unlisted | 403, reachable |
+
 ## Report cells
 
 Cloud: a local relay tunnels HTTPS only to exact allowed hostnames on port 443, and the gateway intercepts every direct port 443 connection and answers it itself, so no request reaches the internet except through the relay.
 
 Platform: Squid tunnels only to the hosts on the runner's per-source allowlist, which the operator edits by hand, and the firewall drops every direct connection, so Squid is the only path out.
+
+Managed Agents: an unlisted hostname does not resolve and a raw IP meets a foreign certificate, so `allowed_hosts` on the environment is the whole egress control, except that `api.anthropic.com` answers from any sandbox.

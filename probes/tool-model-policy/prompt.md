@@ -24,3 +24,11 @@ The operator opened the model picker, noted the models offered, selected Opus 5.
 ```
 Reply with one word: done.
 ```
+
+## Managed Agents
+
+Create body: `agent_with_overrides` on `agent_015ajBRYm99G5kMdMDSRsEY1` with `model.id: claude-opus-5-5`, on environment `env_01LppsRP6QAsjQcMATGMfiKj`, budget 100 cents. The message:
+
+```text
+Answer in one line: which model are you, as your system reports it? Then run with bash exactly: `ls /workspace; printenv | cut -d= -f1 | grep -c -i -E 'mcp|model'`. Report the output verbatim. End with the line DONE.
+```

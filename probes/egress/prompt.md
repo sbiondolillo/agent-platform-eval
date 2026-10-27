@@ -33,3 +33,27 @@ Follow up on 9b. Run each line as one shell call and paste its full output.
 
 End with one sentence: does a direct connection carry data, or does the gateway accept the handshake and drop the rest.
 ```
+
+## Managed Agents
+
+One session on the `judge` agent, on environment `env_01JKqi2Hmpn1wXhN5uGb9rFf`: `limited`, `allowed_hosts: [api.nuget.org]`, `allow_package_managers: false`.
+
+```text
+Run each command below with bash, one at a time, exactly as written. Report the full stdout and stderr of each one verbatim, under a heading that is the command. Create no file. A command that times out is a result: report it as such.
+
+1. `curl -s -m 15 -o /dev/null -w '%{http_code} %{remote_ip}\n' https://api.nuget.org/v3/index.json 2>&1`
+2. `curl -s -m 15 -o /dev/null -w '%{http_code} %{remote_ip}\n' https://open-meteo.com/ 2>&1; echo "exit $?"`
+3. `curl -s -m 15 -o /dev/null -w '%{http_code}\n' https://1.1.1.1/ 2>&1; echo "exit $?"`
+4. `curl -s -m 15 -o /dev/null -w '%{http_code}\n' http://api.nuget.org/v3/index.json 2>&1; echo "exit $?"`
+5. `curl -s -m 15 -o /dev/null -w '%{http_code}\n' https://api.nuget.org:8443/ 2>&1; echo "exit $?"`
+6. `curl -s -m 15 -o /dev/null -w '%{http_code}\n' https://archive.ubuntu.com/ 2>&1; echo "exit $?"`
+7. `curl -s -m 15 -o /dev/null -w '%{http_code}\n' https://api.anthropic.com/ 2>&1; echo "exit $?"`
+8. `curl -s -m 15 -o /dev/null -w '%{http_code}\n' https://github.com/ 2>&1; echo "exit $?"`
+9. `printenv | grep -i -E 'proxy|ca_cert|ca_bundle|cert_file' | sed -E 's/=(.*)/=\1/' | cut -c1-120`
+10. `curl -sv -m 15 -o /dev/null https://open-meteo.com/ 2>&1 | grep -i -E 'proxy|connect|HTTP/|issuer|subject' | head -12`
+11. `ss -ltnp 2>&1 | head; ip route 2>&1 | head -5`
+12. `timeout 10 bash -c 'exec 3<>/dev/tcp/1.1.1.1/53' 2>&1; echo "exit $?"`
+13. `getent hosts open-meteo.com api.nuget.org 2>&1; echo "exit $?"`
+
+End your final answer with one line that reads DONE.
+```

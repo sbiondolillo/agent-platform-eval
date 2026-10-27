@@ -22,8 +22,14 @@ The factory picks the model in code: one constant, `claude-sonnet-5-5`, at `src/
 | what stops a new server's egress | the egress relay, 403 on CONNECT to `mcp.deepwiki.com` | Squid, 403 to any host not on the shared or `sandbox01` list. A stdio server from an allowed registry is not stopped. |
 | a content safeguard observed | yes. A model-side safeguard refused a credential sweep and switched the session to Sonnet 5. It acts on the prompt. | none observed |
 
+## Managed Agents
+
+Probed 2026-10-27 in session `sesn_01ShSm9niXACrBsUXsV7xeD9` ([`capture-ma.md`](capture-ma.md)). Docs: https://platform.claude.com/docs/en/managed-agents/sessions#agent-with-overrides. The `judge` agent is pinned to `claude-sonnet-5-5`. A create body of `agent_with_overrides` with `model.id: claude-opus-5-5` returned 200, and the session's `agent.model.id` read back as `claude-opus-5-5`, so the pin on the agent is a default, not a control. The model itself reports no version. The override lives in the create body, and so do `tools` and `mcp_servers`, which `POST /v1/sessions/{id}` can replace on a live session. Nothing inside the sandbox can reach that endpoint: the environment holds no API key, the tool set is fixed by the caller, and no name in the environment matches `mcp` or `model`. So the control on model and tools is the holder of the API key, which on this arm is the workflow job, and a pin that holds against the job is not documented. The session cost 3 cents in 7 active seconds.
+
 ## Report cells
 
 Cloud: the operator picks any of twelve models with no control and the account's connectors set the tools, so the only controls observed were the egress relay, the start-time tool loading and a model-side safeguard that acts on prompt content.
 
 Platform: the factory fixes the model and the tools in code and Squid stops a new remote server, but the agent holds a gateway key with no model list and runs with every tool allowed, so it can call any gateway model on its own.
+
+Managed Agents: the agent's model pin is a default that any `agent_with_overrides` create body replaces, so the control on model and tools is whoever holds the API key, and the sandbox holds none.
