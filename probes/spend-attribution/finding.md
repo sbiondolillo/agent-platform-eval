@@ -64,6 +64,31 @@ The `session.usage` event in the transcript holds the same figures with the toke
 
 The OpenTelemetry route, proven 2026-10-27: the Claude Console's OpenTelemetry settings (Organization settings, OpenTelemetry, beta) take a telemetry destination with a provider, an OTLP endpoint, credentials in header values, a content mode and a workspace filter. Docs: https://platform.claude.com/docs/en/manage-claude/opentelemetry/api. The operator added Grafana Cloud stack `ambercroissant1151` as a destination with content mode Full content and the managed-agents workspace selected. Session `sesn_01RLfMHCpiSUNJLmDpw2myJ4`, created at 15:53:19Z, appeared in Tempo as trace `8e3b749d1efb663d86c92e3`, service `claude-platform`, root span `anthropic.sessions.create`, 4.95 s, found by `{ span.anthropic.session.id = "sesn_01RLfMHCpiSUNJLmDpw2myJ4" }` within the minute. The API's usage for that session is 94 output tokens, 6 input, 4370 cache read, 4462 cache write, 1 cent. The vendor emits the spans: nothing in the sandbox and nothing in the job exports, which is the opposite of both earlier arms. The spans carry `anthropic.session.id`, the environment id and the GenAI token attributes per model request, and not the session's `metadata`, so a pull request is joined to its trace by the session id the judge writes into its review comment. Read back in Grafana's Agent Observability view on 2026-10-27: the trace has 5 spans, three `anthropic.model_request` calls, the first with `gen_ai.usage.output_tokens` 64, `gen_ai.usage.input_tokens` 4374 and `gen_ai.usage.cache_write.input_tokens` 4370, and the conversation view sums the three calls to 8.9k tokens, 94 output tokens and $0.01, equal to the API's 94 output tokens and `list_cost` of 1 cent. So the cost of one session is readable in Grafana by session id, which is the instrument the row names. The spans also carry `anthropic.organization.id`, `anthropic.workspace.id` and `gen_ai.conversation.id`, a thread id. The operator set the destination to Full content, so the conversation view also shows the bash tool's input and output; the judge's prompts carry the issue body and the diff, so a judged pull request's spec and change land in Grafana Cloud too, which fits a public target and would need Metadata only for a private one. `list_cost` is on the API only; Grafana's dollar figure is its own pricing of the token counts.
 
+## What the three exports carry
+
+Read on 2026-10-28 from the stack's Prometheus, Loki and Tempo data sources by API, with a Viewer service account token. The Cloud reading is session 5, the platform reading is the two runs of 2026-10-25, and the Managed Agents reading is trace `8e3b749d1efb663d86c92e3c2ca4e76f`.
+
+| | Cloud session | Platform | Managed Agents |
+|---|---|---|---|
+| signals | metrics and events | metrics and events | spans only |
+| schema | `claude_code.*`, scope `com.anthropic.claude_code.events` | the same | OpenTelemetry GenAI conventions, scope `com.anthropic.claude-platform`, `service.name` fixed at `claude-platform` |
+| who exports | Claude Code in the VM, through the session's network allowlist | Claude Code in the container, through Squid | the vendor, from outside the sandbox |
+| session key | `ccr_session_id`, stable; `session_id` changed once inside the session, with `start_type=resume` | `session_id`, one per factory phase, six per run, `start_type=fresh` | `anthropic.session.id` on every span, plus `gen_ai.conversation.id` |
+| person | `user_email`, `user_account_id`, `user_account_uuid`, `organization_id` | none; only the installation-scoped `user_id` hash, two values across the two runs | none; `anthropic.organization.id`, `anthropic.workspace.id`, `gen_ai.agent.id` and `gen_ai.agent.name` |
+| cost | `cost_usd` per `api_request` event, and the cost metric per `query_source` | the same, `query_source=main` only | no cost; token counts per `anthropic.model_request` span; `list_cost` is on the API only |
+| content | `prompt` and `response` are `<REDACTED>`; lengths and sizes are present | the same | Full content mode puts tool input and output in the spans |
+| trace ids | `trace_id` and `span_id` on every event, one trace per session | none | native |
+| harness events | `permission_mode_changed` default to auto, two hooks from `flagSettings`, five `mcp_server_connection` events for dynamic HTTP servers, kernel `6.18.44-fc-v180` | `permission_mode=bypassPermissions`, `terminal_type=non-interactive`, `error_type=ShellError` | `anthropic.tool.evaluated_permission` on the tool span, a server span for `POST /v1/sessions` |
+| Claude Code version | 2.1.312 | 2.1.310 | not Claude Code |
+
+Three facts in that table change how a cost is read.
+
+- **The Cloud cost metric has an auxiliary line.** The session's third `api_request` has `query_source=prompt_suggestion`, 506 input tokens and 9 output tokens, at $0.0096523. That is the Cloud UI's suggested next prompt, not the operator's work. It is 7.5 % of the session's $0.1289. A sum over the cost metric needs `query_source="main"`, or a sum over the `api_request` events needs `query_source="sdk"`.
+- **`session_id` is the wrong key on Cloud.** The cost series and the session-count series carry different `session_id` values inside one Cloud session. The docs say to group on `ccr_session_id`, and the data shows why.
+- **Only the Cloud export names a person.** The platform's API key carries no account, so its events carry no email and no organization. Attribution there comes from what the job sets in `OTEL_SERVICE_NAME` or `OTEL_RESOURCE_ATTRIBUTES`. Managed Agents names the workspace and the agent, never a person.
+
+The two Claude Code arms share one schema, so one dashboard reads both. Managed Agents needs its own, on GenAI span attributes. Metrics the platform has and Cloud lacks here, `lines_of_code_count` and `code_edit_tool_decision`, reflect that the platform run edited files and the probe did not. They are not a schema difference.
+
 ## Report cells
 
 Cloud: with the collector host on the environment's Allowed domains, the environment-variables route lands the cost metric and the token counts in the operator's Grafana keyed by `ccr_session_id`. Four earlier sessions with the host only on a network secret exported nothing, since the telemetry export never gets a secret's host exception.
