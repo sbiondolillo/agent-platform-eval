@@ -309,6 +309,31 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
     <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/toolchain/finding.md">toolchain</a>: the apt SDK is <code>10.0.113</code>, and the target's band is <code>10.0.4xx</code>. So the mutation angle stays on the runner.</li>
   </ul>
   <p><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/setup-cost/finding.md">setup-cost</a>: Managed Agents took 6 operator steps and 2 new secrets. Cloud Sessions took 25 steps and 4 secrets. The platform took 28 steps and no new secret, on 9 lab items.</p>
+
+  <h4>Who the record names</h4>
+  <p>Each arm's telemetry and API record name a different actor. Read on 2026-10-28 from one Grafana Cloud stack that holds all three exports.</p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th scope="col"></th><th scope="col">Cloud Sessions</th><th scope="col">Platform</th><th scope="col">Managed Agents</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">person</th><td><code>user_email</code>, the account ids and <code>organization_id</code> on every metric and event</td><td>none. An API key carries no account, so the job names itself in <code>OTEL_SERVICE_NAME</code></td><td>none. The workspace, the API key, the agent id and name</td></tr>
+      <tr><th scope="row">session key</th><td><code>ccr_session_id</code>, stable across the session's restarts</td><td><code>session_id</code>, one per factory phase</td><td><code>anthropic.session.id</code> on every span, and <code>metadata</code> the caller set, on the API</td></tr>
+      <tr><th scope="row">who started it</th><td>the signed-in person</td><td>the GitHub event, in the job log</td><td>the holder of the workspace key. The job writes the GitHub actor into <code>metadata</code> if anyone is to be named</td></tr>
+      <tr><th scope="row">forge identity</th><td>the person's own account, through the managed proxy</td><td>the token the factory reads from the vault</td><td>the token the caller passed</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="meta">Proof: <a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/spend-attribution/finding.md">spend-attribution</a>, <a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/forge-credential/finding.md">forge-credential</a>, <a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/run-history/finding.md">run-history</a>.</p>
+</section>
+
+<section>
+  <h2>Who starts the session decides</h2>
+  <p>The two hosted arms are not substitutes. The rows split on who starts the session.</p>
+  <ul>
+    <li><strong>A person, working interactively.</strong> Cloud Sessions. The record names the person and the organization. Telemetry goes to the organization's collector through server-managed settings, with the collector host on the environment's allowlist. The controls are the person's: any model, an admin push, no API to list or export sessions.</li>
+    <li><strong>A repository event, in a pipeline.</strong> Managed Agents. The job holds the keys and starts the session by API. The sandbox holds no model key and a token that cannot push. Every session is listed and exported by API with its cost and the job's metadata. The record names a key, never a person.</li>
+    <li><strong>The lab platform</strong> sits between them: the same telemetry schema as Cloud with no person in it, and an independent gateway ledger that neither hosted arm has.</li>
+  </ul>
 </section>
 
 <section>
