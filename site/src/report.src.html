@@ -137,7 +137,7 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
       <tr><th scope="row">gates</th><td>The build suite passed 14 of 14. PR 5 passed <code>build</code> and <code>integration</code> in CI.</td><td>Attempt 2 passed every gate. PR 6 passed <code>build</code> and <code>integration</code> in CI.</td><td>The sessions did not build. PR 351 passed <code>build</code> and <code>integration</code> in CI.</td></tr>
       <tr><th scope="row">review verdict</th><td><code>APPROVED</code></td><td>Approved after one redo</td><td>Both angles accepted, so <code>APPROVED</code></td></tr>
       <tr><th scope="row">wall time</th><td>About 7 min for the build</td><td>6 min 45 s</td><td>2 min 35 s for the review</td></tr>
-      <tr><th scope="row">spend</th><td>Not exposed per session</td><td>$0.6514 on the gateway ledger</td><td>24 cents in <code>usage.list_cost</code></td></tr>
+      <tr><th scope="row">spend</th><td>Not captured for PR 5, which ran before the telemetry route was proven. A later session on the same arm read $0.1193 by <code>ccr_session_id</code> in Grafana Cloud, plus $0.0097 for the UI's prompt suggestion.</td><td>$0.6514 on the gateway ledger</td><td>24 cents in <code>usage.list_cost</code></td></tr>
       <tr><th scope="row">proof</th><td><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/cloud-delivery/finding.md">cloud-delivery</a></td><td><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/platform-delivery/finding.md">platform-delivery</a></td><td><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/platform-delivery/finding.md">platform-delivery</a></td></tr>
     </tbody>
   </table>
