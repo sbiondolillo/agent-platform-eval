@@ -94,3 +94,26 @@ Range Last 15 minutes:
 ```
 {__name__=~"claude_code.*", ccr_session_id="<value of CLAUDE_CODE_REMOTE_SESSION_ID>"}
 ```
+
+## Fifth session, 2026-10-28
+
+The teardown had removed every variable and the network secret. The operator added `otlp-gateway-prod-us-east-2.grafana.net` to the environment's Allowed domains, and restored nine variables: the seven from the plan, `OTEL_EXPORTER_OTLP_HEADERS` and `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative`. Service name `agent-platform-eval-cloud`. No network secret. Session "Spend attribution probe 5".
+
+```
+This is a probe for an experiment. Do not edit, commit, push or branch. Run each numbered command below in its own Bash call, then paste every output unedited in your reply with its command as a heading. Add no commentary beyond one sentence at the end.
+
+1. echo "remote session id: ${CLAUDE_CODE_REMOTE_SESSION_ID:-unset}"
+2. curl -sS -m 20 -o /dev/null -w 'otlp metrics endpoint, no auth: %{http_code}\n' -X POST -H 'Content-Type: application/x-protobuf' --data-binary '' https://otlp-gateway-prod-us-east-2.grafana.net/otlp/v1/metrics; echo "exit=$?"
+3. for i in 1 2 3 4 5; do date -u; sleep 12; done
+4. echo "remote session id: ${CLAUDE_CODE_REMOTE_SESSION_ID:-unset}"
+```
+
+Expected: command 2 returns 401, which proves the allowlist admits the host, since the proxy answers 403 for a blocked one. Command 3 holds the session open for six export intervals.
+
+### Grafana Explore query
+
+Range Last 15 minutes:
+
+```
+{__name__=~"claude_code.*", ccr_session_id="<value of CLAUDE_CODE_REMOTE_SESSION_ID>"}
+```

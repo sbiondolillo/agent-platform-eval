@@ -175,10 +175,63 @@ Range Last 15 minutes:
 
 The same variables exported from the workstation produced series in this stack ([`capture-workstation.md`](capture-workstation.md)). So the variables and the stack are sound, and the Cloud result stands.
 
+## Session 5, "Spend attribution probe 5", 2026-10-28
+
+The teardown of 2026-10-25 had removed every variable and the network secret. Before this session the operator added `otlp-gateway-prod-us-east-2.grafana.net` to the environment's Allowed domains, and restored nine variables: the seven from the plan, `OTEL_EXPORTER_OTLP_HEADERS` and cumulative temporality. Service name `agent-platform-eval-cloud`. No network secret. Taken 2026-10-28 at 01:18 UTC. Prompt: [`prompt.md`](prompt.md).
+
+## 1. `echo "remote session id: ${CLAUDE_CODE_REMOTE_SESSION_ID:-unset}"`
+```
+remote session id: cse_01VD1PnVJDYJwdg65troLXCf
+```
+
+## 2. empty POST, no auth header, via the session's network
+```
+otlp metrics endpoint, no auth: 401
+exit=0
+```
+
+## 3. `for i in 1 2 3 4 5; do date -u; sleep 12; done`
+```
+Wed Oct 28 01:18:45 UTC 2026
+Wed Oct 28 01:18:57 UTC 2026
+Wed Oct 28 01:19:09 UTC 2026
+Wed Oct 28 01:19:21 UTC 2026
+Wed Oct 28 01:19:33 UTC 2026
+```
+
+## 4. `echo "remote session id: ${CLAUDE_CODE_REMOTE_SESSION_ID:-unset}"`
+```
+remote session id: cse_01VD1PnVJDYJwdg65troLXCf
+```
+
+All four commands ran in separate Bash calls, and I made no edits, commits, pushes or branches.
+
+### Grafana Explore, about 01:20 UTC
+
+Range Last 1 hour:
+
+| Query | Result |
+|---|---|
+| `{__name__=~"claude_code.*", ccr_session_id="cse_01VD1PnVJDYJwdg65troLXCf"}` | 12 series |
+
+Every series carries `ccr_session_id="cse_01VD1PnVJDYJwdg65troLXCf"`, `job="agent-platform-eval-cloud"`, `service_name="agent-platform-eval-cloud"` and `organization_id`. Among them:
+
+| Series | Value |
+|---|---|
+| `claude_code_cost_usage_USD_total{query_source="main", model="claude-sonnet-5-5"}` | 0.11928 |
+| `claude_code_cost_usage_USD_total{query_source="auxiliary", model="claude-sonnet-5-5"}` | 0.0096523 |
+| `claude_code_active_time_seconds_total{type="cli"}` | 76.467 |
+| `claude_code_session_count_total{start_type="resume"}` | 1 |
+| `claude_code_token_usage_tokens_total` | one series per `type` |
+
+The `session_id` label on the cost series is `cc671e66-dffd-5637-9183-29b225cdb9bd`, and on the session count series `1b1a4017-15dd-4f15-8523-9e372897c171`. The `ccr_session_id` label is the same on both, which is why the docs say to group on it.
+
 ## Reading
 
-The Bash tool's shell gets the environment's variables minus every `OTEL_` name, which the cloud-environments doc states. The Claude Code process, the one that would export, held none of the telemetry variables in any session. Nothing was exported by the documented environment route in four sessions.
+Sessions 1 to 4 exported nothing. Session 5 exported everything, keyed by `ccr_session_id`. One change separates them: the collector host on the environment's Allowed domains. The variables of session 5 are the variables of session 4.
 
-Two candidate causes were ruled out. The missing header was not the cause: session 3 added it and nothing arrived. Delta temporality was not the cause: session 4 set cumulative and nothing arrived. The same variables work from the workstation, against the same stack. The cause is upstream of the gateway: the process in the VM never received the variables.
+The cloud-environments doc states the rule. A network secret opens its host to the session, "except the hosts that never get the secret", and Claude Code's own telemetry export is on that list. The export goes through the session's network allowlist, which never held the Grafana host before session 5. The proxy refused it, and the exporter is silent on a refusal.
 
-The VM has no DNS, so an export that bypasses the agent proxy, as the monitoring doc describes, has no route out. The proxied route works: an empty POST through the network secret returned 200 in both sessions that tried it. The Grafana Cloud stack ambercroissant1151 never received a Cloud session metric.
+The `curl` checks of sessions 1 and 3 measured the wrong client. A Bash command is a request Claude runs, so the network secret's host exception applied to it, and the proxy answered 200. The exporter never had that path.
+
+The earlier reading, that the Claude Code process never received the variables, rested on `/proc/<pid>/environ`. That file is the exec-time snapshot. The harness delivers the environment's values after launch, into `process.env`, which `/proc` never shows. The Bash child of session 2 held `CLAUDE_CODE_ENABLE_TELEMETRY` while its parent's `/proc` environment did not, which fits that. So the variables did reach the process in every session. The `/proc` read is not an instrument for this question.

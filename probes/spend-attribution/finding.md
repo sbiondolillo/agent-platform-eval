@@ -13,11 +13,21 @@ The docs were read after the first session, on 2026-10-24.
 
 ## Cloud Sessions
 
-Four sessions ran with the environment's variables as the route, the second documented one. Nothing was exported. The Claude Code process held none of the telemetry variables in any session, read from `/proc/<pid>/environ` by name. No metric reached the stack with the header variable, nor with cumulative temporality.
+The environment-variables route works. Session 5 on 2026-10-28 landed 12 series in the stack within two export intervals, every one keyed by `ccr_session_id`, with the cost metric per `query_source` and model, the token counts per type, the active time and the session count. The cost of the session reads as $0.11928 on the main query plus $0.0096523 on the auxiliary one.
 
-The workstation run proves the variables and the stack. The same variables, with cumulative temporality, landed seven series in the same stack. So the cause is upstream of the gateway: the process in the VM never received the variables. The VM also resolves no hostname without the proxy, so an export that bypasses the proxy has no route out.
+Sessions 1 to 4 on 2026-10-25 exported nothing, with the same variables. The one difference is the collector host on the environment's Allowed domains. The cloud-environments doc names the rule: a network secret opens its host to the session, "except the hosts that never get the secret", and Claude Code's own telemetry export is one of those. The export goes through the session's network allowlist. The host was only on a network secret in sessions 1 to 4, so the proxy refused the export, and the exporter is silent on a refusal. The `curl` checks that returned 200 measured a Bash command, which does get the secret's host exception.
 
-The other documented route, server-managed settings, needs an organization Owner and was not tried. Spend for a Cloud session is read where Anthropic shows it: the account's usage view, which [`../cloud-logging/finding.md`](../cloud-logging/finding.md) records.
+The earlier reading, that the process never received the variables, was wrong. It rested on `/proc/<pid>/environ`, the exec-time snapshot. The harness delivers the environment's values after launch, into `process.env`, which `/proc` never shows. The Bash child of session 2 held `CLAUDE_CODE_ENABLE_TELEMETRY` while its parent's `/proc` environment did not.
+
+Three settings are needed, and the docs state each in a different place:
+
+| Setting | Where the docs say it |
+|---|---|
+| the collector host on the environment's Allowed domains | Monitoring usage, "Let sessions reach the collector" |
+| the Basic auth pair in `OTEL_EXPORTER_OTLP_HEADERS`, not in a network secret | Cloud environments, "Requests that never get the secret" |
+| `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=cumulative` for Grafana Cloud | the Grafana Cloud "Claude Code" integration page only |
+
+The variables route puts the collector token where anyone who uses the environment can read it. The docs' route for a credential is server-managed settings, which needs an organization Owner, and the Allowed domains line is still needed there, since no server-managed setting adds a domain. That route is untested here.
 
 ## Platform
 
@@ -36,8 +46,7 @@ The exporter is silent on failure in every arm. No log line, in the CLI or the A
 
 ## Open
 
-- Why the Claude Code process in a Cloud session got none of the environment's telemetry variables is a question for Anthropic.
-- Server-managed settings as the Cloud route is untested.
+- Server-managed settings as the credential route for Cloud sessions is untested. It needs an organization Owner.
 - For DSF v2, a factory that passes the telemetry names natively. It sets cumulative temporality, and either flushes on exit or sums cost over the events.
 
 ## Managed Agents
@@ -57,7 +66,7 @@ The OpenTelemetry route, proven 2026-10-27: the Claude Console's OpenTelemetry s
 
 ## Report cells
 
-Cloud: the documented environment route exported nothing in four sessions, the Claude Code process held none of the variables, and spend is read only from Anthropic's usage view.
+Cloud: with the collector host on the environment's Allowed domains, the environment-variables route lands the cost metric and the token counts in the operator's Grafana keyed by `ccr_session_id`. Four earlier sessions with the host only on a network secret exported nothing, since the telemetry export never gets a secret's host exception.
 
 Platform: with a nine-name pass-through in the factory, the cost metric and one event per API request land in the operator's Grafana keyed by session id, and the metric reads within one export interval of the factory's own log.
 

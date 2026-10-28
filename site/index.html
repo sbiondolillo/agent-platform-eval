@@ -159,7 +159,7 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
       </tr>
       <tr>
         <th scope="row"><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/spend-attribution/finding.md">spend-attribution</a></th>
-        <td data-label="Cloud Sessions"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/spend-attribution/finding.md">the documented environment route exported nothing in four sessions, the Claude Code process held none of the variables, and spend is read only from Anthropic's usage view.</a></td>
+        <td data-label="Cloud Sessions"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/spend-attribution/finding.md">with the collector host on the environment's Allowed domains, the environment-variables route lands the cost metric and the token counts in the operator's Grafana keyed by <code>ccr_session_id</code>. Four earlier sessions with the host only on a network secret exported nothing, since the telemetry export never gets a secret's host exception.</a></td>
         <td data-label="Platform"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/spend-attribution/finding.md">with a nine-name pass-through in the factory, the cost metric and one event per API request land in the operator's Grafana keyed by session id, and the metric reads within one export interval of the factory's own log.</a><sup><a href="#fn-8" id="fnref-8">8</a></sup></td>
         <td data-label="Managed Agents"><a class="cell" href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/spend-attribution/finding.md"><code>usage.list_cost</code> per session, with the caller's <code>metadata</code> on it, gives the cost of one review keyed by pull request from a list call, and a telemetry destination in the Console sends every session's spans with token counts to Grafana Cloud with no export from the sandbox or the job.</a></td>
       </tr>
@@ -279,7 +279,7 @@ footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule);
   <h3>Rows the docs do not settle, with the probe result</h3>
   <ul>
     <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/run-history/finding.md">run-history</a>: no documented API or CLI command lists Cloud sessions or exports a transcript.</li>
-    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/spend-attribution/finding.md">spend-attribution</a>: the documented environment route exported nothing in four Cloud sessions. The platform lands the cost metric with a nine-name pass-through.</li>
+    <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/spend-attribution/finding.md">spend-attribution</a>: Cloud lands the cost metric keyed by <code>ccr.session.id</code> once the collector host is on the environment's Allowed domains. Four earlier sessions exported nothing with the host only on a network secret. The platform lands it with a nine-name pass-through.</li>
     <li><a href="https://github.com/sbiondolillo/agent-platform-eval/blob/main/probes/subagent-record/finding.md">subagent-record</a>: whether the subagent's own transcript outlives the container is pending the reclaim step.</li>
   </ul>
 
