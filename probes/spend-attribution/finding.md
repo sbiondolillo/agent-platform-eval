@@ -103,20 +103,31 @@ Read on 2026-11-01. The earlier row was the docs' claim, never observed in a spa
 | The app removes the content before Tempo stores the span | Inference from the two readings above | Not documented. The effect is proven and the mechanism is not. |
 | The app has its own store | Grafana, "Data handling and privacy" | Documented in part. The text is "generation data" in the stack's tenant and region, kept 30 days. Traces follow their data source's retention. `/api/datasources` lists no data source for it. |
 | The stack has the app | this repo's reading of `/api/plugins` | Confirmed. `/api/plugins` lists 28 entries and 0 of type `app`. `/api/plugins/grafana-agento11y-app/settings` returns 200: enabled, version 1.28.0. |
-| An API reads a conversation | `gcx` source, `internal/providers/agento11y/` | Documented. `GET /api/plugins/grafana-agento11y-app/resources/query/conversations/<id>` returns the conversation with its generations. `POST .../query/conversations/search` finds one. |
-| The Viewer token reads it | test | Refuted. It gets 403 on `/query/conversations/<id>`, `/query/conversations`, `/query/generations/<id>` and `/query/agents`. It holds `plugins.app:access` and no `grafana-agento11y-app.*` action. |
+| An API reads a conversation | `gcx` source, `internal/providers/agento11y/` | Confirmed. `GET /api/plugins/grafana-agento11y-app/resources/query/conversations/<id>` returns 200 with the conversation and its generations. `POST .../query/conversations/search` returns 200 with the filter `agent = "dsf-builder"`. |
+| The Viewer token reads it | test before the grant | Refuted. It got 403 on `/query/conversations/<id>`, `/query/conversations`, `/query/generations/<id>` and `/query/agents`. It held `plugins.app:access` and no `grafana-agento11y-app.*` action. The service account now holds `Agento11y Reader`, and all those routes that were retested return 200. |
 | A role reads it | the app's `plugin.json`, Grafana "Security and access controls" | Documented. `grafana-agento11y-app.conversations:read` comes with `Agento11y Reader`, the docs' Agent Observability Reader. Grafana grants that role to Editor and Admin. The Viewer basic role gets `plugins.app:access` only. |
 | A Cloud Access Policy scope reads it | Grafana docs | No such scope is documented. The docs name `sigil:write`, for ingest only. `gcx` reads through Grafana with a service account token, under the app's RBAC. |
-| A session can read a builder transcript through that route | none yet | Not proven. It needs the role on a service account. |
-| The stored text is whole | Claude docs, "Content limits" | Not proven. The 0.75 MB limit drops the earliest messages first, and `anthropic.content.truncated` is not readable in Tempo. |
+| A session can read a builder transcript through that route | test after the grant | Confirmed. The token read all three named sessions. |
+| The stored text equals the transcript | DSF store `events.jsonl`, compared item by item | Confirmed for three sessions. See the next table. |
+| The 0.75 MB limit leaves the text whole | Claude docs, "Content limits" | Not exercised. The largest generation of the three is 86,268 bytes. A turn over the limit loses its earliest messages first, and `anthropic.content.truncated` is not readable in Tempo. |
 
-The check a later session owes, once a service account holds `Agento11y Reader`. It passes on `200`, with a body that holds the generations' input and output messages. This command prints the status only.
+Each cell gives the items that match over the items in the store. The API and the store agree on every count.
 
-```bash
-curl -s -H @"$HOME/.config/agent-platform-eval/grafana-read.headers" -o /dev/null -w '%{http_code}\n' "https://ambercroissant1151.grafana.net/api/plugins/grafana-agento11y-app/resources/query/conversations/sthr_01CzTFiaPx7birUe38hXRN51"
-```
+| Session | Role | Conversation | Generations with content | User messages | Agent messages | Tool inputs | Tool results |
+|---|---|---|---|---|---|---|---|
+| `sesn_01JvEWGnAFP5FCULKJS7sR6F` | builder, run 41325977119 | `sthr_01CzTFiaPx7birUe38hXRN51` | 6 of 39 | 6/6 | 7/7 | 27/27 | 27/27 |
+| `sesn_019nEpvAq4GYQHMVtCX1f5YT` | reviewer, run 41325977119 | `sthr_01DV6rmJBZHDKMynJkSR1B3p` | 3 of 19 | 3/3 | 4/4 | 13/13 | 13/13 |
+| `sesn_01BszeMx9b945ww5uWLtgUW4` | builder, run 41324368718 | `sthr_01CNeFQdo7aXJSsxFzQQFE2V` | 2 of 19 | 2/2 | 6/6 | 16/16 | 16/16 |
 
-After that, compare the text with the transcript in the DSF store repo. The comparison settles the last row.
+To read a transcript from the app:
+
+1. Resolve the conversation id in Tempo, with `{ span.anthropic.session.id = "<session>" && span.gen_ai.conversation.id != nil } | select(span.gen_ai.conversation.id)`.
+2. Send `GET /api/plugins/grafana-agento11y-app/resources/query/conversations/<id>` with the read token.
+3. Keep the generations with `operation_name` `invoke_agent`. The `chat` generations hold metadata only.
+4. Read `input`, `output` and `system_prompt`. Each message holds `parts`, and each part holds `text`, `tool_call` or `tool_result`.
+5. Decode `tool_call.input_json` and `tool_result.content_json`. Each is Base64 of a JSON document.
+
+The app keeps the text 30 days. The DSF store keeps it with no such limit, so the store stays the record of a run.
 
 ## Report cells
 
