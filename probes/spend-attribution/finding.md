@@ -119,10 +119,10 @@ Each cell gives the items that match over the items in the store. The API and th
 | `sesn_019nEpvAq4GYQHMVtCX1f5YT` | reviewer, run 41325977119 | `sthr_01DV6rmJBZHDKMynJkSR1B3p` | 3 of 19 | 3/3 | 4/4 | 13/13 | 13/13 |
 | `sesn_01BszeMx9b945ww5uWLtgUW4` | builder, run 41324368718 | `sthr_01CNeFQdo7aXJSsxFzQQFE2V` | 2 of 19 | 2/2 | 6/6 | 16/16 | 16/16 |
 
-To read a transcript from the app:
+To read a transcript from the app, use the stack `https://ambercroissant1151.grafana.net` and the token file `~/.config/agent-platform-eval/grafana-read.headers`, as `curl -H @<file>`. Save each body to a file, and select fields from it. A transcript can hold secrets, and the token file exists on the operator's workstation only.
 
-1. Resolve the conversation id in Tempo, with `{ span.anthropic.session.id = "<session>" && span.gen_ai.conversation.id != nil } | select(span.gen_ai.conversation.id)`.
-2. Send `GET /api/plugins/grafana-agento11y-app/resources/query/conversations/<id>` with the read token.
+1. Resolve the conversation id. Send `GET /api/datasources/proxy/uid/grafanacloud-traces/api/search` with `start`, `end` and `q` set to `{ span.anthropic.session.id = "<session>" && span.gen_ai.conversation.id != nil } | select(span.gen_ai.conversation.id)`.
+2. Send `GET /api/plugins/grafana-agento11y-app/resources/query/conversations/<id>`.
 3. Keep the generations with `operation_name` `invoke_agent`. The `chat` generations hold metadata only.
 4. Read `input`, `output` and `system_prompt`. Each message holds `parts`, and each part holds `text`, `tool_call` or `tool_result`.
 5. Decode `tool_call.input_json` and `tool_result.content_json`. Each is Base64 of a JSON document.
