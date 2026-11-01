@@ -76,7 +76,7 @@ Read on 2026-10-28 from the stack's Prometheus, Loki and Tempo data sources by A
 | session key | `ccr_session_id`, stable; `session_id` changed once inside the session, with `start_type=resume` | `session_id`, one per factory phase, six per run, `start_type=fresh` | `anthropic.session.id` on every span, plus `gen_ai.conversation.id` |
 | person | `user_email`, `user_account_id`, `user_account_uuid`, `organization_id` | none; only the installation-scoped `user_id` hash, two values across the two runs | none; `anthropic.organization.id`, `anthropic.workspace.id`, `gen_ai.agent.id` and `gen_ai.agent.name` |
 | cost | `cost_usd` per `api_request` event, and the cost metric per `query_source` | the same, `query_source=main` only | no cost; token counts per `anthropic.model_request` span; `list_cost` is on the API only |
-| content | `prompt` and `response` are `<REDACTED>`; lengths and sizes are present | the same | Full content mode puts tool input and output in the spans |
+| content | `prompt` and `response` are `<REDACTED>`; lengths and sizes are present | the same | Tempo holds metadata only. Full content lands in the Agent Observability store; see [Where Full content lands](#where-full-content-lands) |
 | trace ids | `trace_id` and `span_id` on every event, one trace per session | none | native |
 | harness events | `permission_mode_changed` default to auto, two hooks from `flagSettings`, five `mcp_server_connection` events for dynamic HTTP servers, kernel `6.18.44-fc-v180` | `permission_mode=bypassPermissions`, `terminal_type=non-interactive`, `error_type=ShellError` | `anthropic.tool.evaluated_permission` on the tool span, a server span for `POST /v1/sessions` |
 | Claude Code version | 2.1.312 | 2.1.310 | not Claude Code |
@@ -88,6 +88,35 @@ Three facts in that table change how a cost is read.
 - **Only the Cloud export names a person.** The platform's API key carries no account, so its events carry no email and no organization. Attribution there comes from what the job sets in `OTEL_SERVICE_NAME` or `OTEL_RESOURCE_ATTRIBUTES`. Managed Agents names the workspace and the agent, never a person.
 
 The two Claude Code arms share one schema, so one dashboard reads both. Managed Agents needs its own, on GenAI span attributes. Metrics the platform has and Cloud lacks here, `lines_of_code_count` and `code_edit_tool_decision`, reflect that the platform run edited files and the probe did not. They are not a schema difference.
+
+### Where Full content lands
+
+Read on 2026-11-01. The earlier row was the docs' claim, never observed in a span. The destination is `agent-platform-eval`, content mode Full content, size limit 0.75 MB. The subject is DSF builder session `sesn_01JvEWGnAFP5FCULKJS7sR6F`, conversation `sthr_01CzTFiaPx7birUe38hXRN51`, trace `1b9974870e284fe929d4de45baa85e86`.
+
+| Claim | Source of the claim | Reading |
+|---|---|---|
+| Claude sends the text | Claude docs, "A Managed Agents session" | Confirmed. The Conversations page shows the `dsf-builder` message text at step 1 of 39 of this conversation. Operator's view of the page, 2026-11-01. |
+| The text is readable in the spans in Tempo | Claude docs; this file's earlier row | Refuted. The trace has 13 spans and none holds a content attribute. Its longest string value is 37 characters. |
+| Any span in Tempo holds content | Claude span reference | Refuted. TraceQL over seven days finds 0 traces with `gen_ai.input.messages`, `gen_ai.output.messages`, `gen_ai.system_instructions`, `gen_ai.tool.call.arguments`, `anthropic.tool_result.content` or `anthropic.content.truncated`. The three named sessions each return 20 traces, the search limit, so the query reaches them. |
+| The app makes conversations from span attributes | Grafana, "Instrument agents with OpenTelemetry" | Documented. `agento11y.record=true` opts a span in, and `gen_ai.input.messages` and `gen_ai.output.messages` fill the conversation. |
+| `X-Grafana-Agento11y-Record` is the Claude preset's form of that opt-in | Inference from the name | Not documented. The Grafana docs index, `grafana/gcx` and `grafana/agento11y` never name the header. Tempo's copy of the trace holds only `service.name` as a resource attribute. |
+| The app removes the content before Tempo stores the span | Inference from the two readings above | Not documented. The effect is proven and the mechanism is not. |
+| The app has its own store | Grafana, "Data handling and privacy" | Documented in part. The text is "generation data" in the stack's tenant and region, kept 30 days. Traces follow their data source's retention. `/api/datasources` lists no data source for it. |
+| The stack has the app | this repo's reading of `/api/plugins` | Confirmed. `/api/plugins` lists 28 entries and 0 of type `app`. `/api/plugins/grafana-agento11y-app/settings` returns 200: enabled, version 1.28.0. |
+| An API reads a conversation | `gcx` source, `internal/providers/agento11y/` | Documented. `GET /api/plugins/grafana-agento11y-app/resources/query/conversations/<id>` returns the conversation with its generations. `POST .../query/conversations/search` finds one. |
+| The Viewer token reads it | test | Refuted. It gets 403 on `/query/conversations/<id>`, `/query/conversations`, `/query/generations/<id>` and `/query/agents`. It holds `plugins.app:access` and no `grafana-agento11y-app.*` action. |
+| A role reads it | the app's `plugin.json`, Grafana "Security and access controls" | Documented. `grafana-agento11y-app.conversations:read` comes with `Agento11y Reader`, the docs' Agent Observability Reader. Grafana grants that role to Editor and Admin. The Viewer basic role gets `plugins.app:access` only. |
+| A Cloud Access Policy scope reads it | Grafana docs | No such scope is documented. The docs name `sigil:write`, for ingest only. `gcx` reads through Grafana with a service account token, under the app's RBAC. |
+| A session can read a builder transcript through that route | none yet | Not proven. It needs the role on a service account. |
+| The stored text is whole | Claude docs, "Content limits" | Not proven. The 0.75 MB limit drops the earliest messages first, and `anthropic.content.truncated` is not readable in Tempo. |
+
+The check a later session owes, once a service account holds `Agento11y Reader`. It passes on `200`, with a body that holds the generations' input and output messages. This command prints the status only.
+
+```bash
+curl -s -H @"$HOME/.config/agent-platform-eval/grafana-read.headers" -o /dev/null -w '%{http_code}\n' "https://ambercroissant1151.grafana.net/api/plugins/grafana-agento11y-app/resources/query/conversations/sthr_01CzTFiaPx7birUe38hXRN51"
+```
+
+After that, compare the text with the transcript in the DSF store repo. The comparison settles the last row.
 
 ## Report cells
 
